@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.git-enabled
+    ports:
+      - "8080:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
+      - PGDATABASE=ticket_management
+      - PGUSER=postgres
+      - PGPASSWORD=ticketpass123
+      - PGHOST=postgres
+      - PGPORT=5432
+      # Git repository configuration
+      - GIT_REPO_URL=https://github.com/your-username/ticket-management.git
+      - GIT_BRANCH=main
+    volumes:
+      # Mount for persistent git history and updates
+      - app_data:/app
+      # Optional: SSH keys for private repositories
+      - ./ssh_keys:/root/.ssh:ro
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ticket_management
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=ticketpass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Optional: Git webhook service for automatic updates
+  webhook:
+    image: adnanh/webhook:latest
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./webhook-config.json:/etc/webhook/hooks.json:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["-verbose", "-hooks=/etc/webhook/hooks.json", "-hotreload"]
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  app_data:

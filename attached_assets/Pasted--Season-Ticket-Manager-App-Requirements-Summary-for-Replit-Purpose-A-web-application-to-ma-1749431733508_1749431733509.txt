@@ -1,0 +1,104 @@
+🧾 Season Ticket Manager – App Requirements Summary (for Replit)
+💡 Purpose:
+A web application to manage and track season ticket ownership, game attendance, seat sales, and financial activity across multiple teams, seasons, and ticket holders.
+
+🧱 Core Data Models:
+Teams
+
+id, name
+
+Seasons
+
+id, team_id, year
+
+Games
+
+id, season_id, date, opponent, home_game (bool), notes
+
+Seats
+
+id, section, row, number, team_id, license_cost
+
+Seat Ownership
+
+seat_id, season_id, ticket_holder_id
+
+Ticket Holders
+
+id, name, email, notes
+
+Payments
+
+id, ticket_holder_id, amount, date — represents payments into the pool by each ticket holder
+
+Payouts
+
+id, ticket_holder_id, game_id, amount — earnings to the ticket holder per game
+
+Transfers
+
+id, from_ticket_holder_id, to_ticket_holder_id, seat_id, game_id, amount, date
+
+Game Attendance
+
+ticket_holder_id, seat_id, game_id — who is attending which game and in which seat
+
+🖥️ Key Features (UI Requirements):
+Dashboard per season
+
+Shows all games for a selected team/season
+
+Allows entry/editing of cost and sold price per seat per game
+
+Seat selection & attendance
+
+Owners can mark seats they are attending
+
+Transfer ownership of a seat for a single game to another ticket holder
+
+Financial tracking
+
+Track payments into the system per ticket holder (with date)
+
+Track payouts per ticket holder, per game
+
+Track license costs (seat ownership cost not tied to a specific game)
+
+Summaries
+
+Per-person balance sheet: payments in, transfers, attendance, payouts
+
+Per-season profit/loss by seat, game, or ticket holder
+
+⚙️ Backend Requirements:
+PostgreSQL (or compatible SQL database)
+
+REST API (or GraphQL) to:
+
+Fetch and update game data
+
+Manage seats, ownership, transfers
+
+Track all financial transactions
+
+Optional: WebSocket for real-time updates
+
+🌐 Frontend Requirements:
+Web UI (React, Vue, or any JS framework)
+
+Table views (editable cells for prices)
+
+Dropdown selectors (for team, season, ticket holder)
+
+Auth system (optional: allow logins for each ticket holder)
+
+Responsive/mobile-friendly
+
+🧪 Future Ideas:
+Email alerts when seats are transferred
+
+Auto-calculate payouts per game
+
+Charts for ticket value trends
+
+Export reports to CSV

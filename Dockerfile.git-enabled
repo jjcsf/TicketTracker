@@ -1,0 +1,59 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies for build
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build the React frontend
+RUN npm run build
+
+# Production stage with Git support
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install Git, PostgreSQL client, and other tools
+RUN apk add --no-cache git postgresql-client curl bash
+
+# Create package.json with required dependencies
+RUN echo '{"name":"ticket-management","version":"1.0.0","dependencies":{"express":"^4.18.2","pg":"^8.11.3","cors":"^2.8.5"}}' > package.json
+RUN npm install
+
+# Copy built frontend from builder stage
+COPY --from=builder /app/client/dist ./client/dist
+
+# Copy server files
+COPY server/ ./server/
+COPY shared/ ./shared/
+
+# Copy container-specific server
+COPY container-server.js ./server/start.js
+
+# Copy git update script
+COPY git-update-script.sh ./update.sh
+RUN chmod +x ./update.sh
+
+# Create git configuration directory
+RUN mkdir -p /root/.ssh
+
+# Set up git global configuration
+RUN git config --global user.name "Container User" && \
+    git config --global user.email "container@localhost" && \
+    git config --global init.defaultBranch main
+
+EXPOSE 5000
+ENV NODE_ENV=production
+
+# Initialize as git repository on startup
+RUN git init . && \
+    git add . && \
+    git commit -m "Initial container setup" || true
+
+CMD ["node", "server/start.js"]

@@ -1,0 +1,11 @@
+                                  <SelectContent>
+                                    <SelectItem value="none">Not applicable (One-time payment)</SelectItem>
+                                    {seasons?.map((season) => {
+                                      const team = teams?.find(t => t.id === season.teamId);
+                                      return (
+                                        <SelectItem key={season.id} value={season.id.toString()}>
+                                          {team?.name} - {season.year}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
