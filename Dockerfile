@@ -16,7 +16,7 @@ RUN npm run build
 RUN npm install pg@^8.11.3 cors@^2.8.5
 
 # Copy the container server
-COPY container-start.js ./server/container-start.js
+COPY server/container-start.js ./server/container-start.js
 
 EXPOSE 5000
 ENV NODE_ENV=production
