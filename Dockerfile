@@ -1,27 +1,31 @@
-# Use a more compatible base image
-FROM node:20-slim
+# --- Build Stage ---
+FROM node:20-slim AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install all dependencies (including dev)
 COPY package.json package-lock.json ./
+RUN npm ci
 
-# Install production dependencies
-RUN npm ci --only=production
-
-# Copy the rest of the application
+# Copy the rest of the app
 COPY . .
 
-# Build the frontend (if applicable)
+# Build the frontend and server
 RUN npm run build
 
-# Install additional production dependencies
-RUN npm install pg@^8.11.3 cors@^2.8.5
+# --- Production Stage ---
+FROM node:20-slim
 
-# Ensure the container-start.js file exists and is copied correctly
-# Adjust the path if it's located in a subdirectory
-COPY server/container-start.js ./server/container-start.js
+WORKDIR /app
+
+# Copy only production dependencies
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# Copy built app and server files from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/shared ./shared
 
 # Set environment and expose port
 ENV NODE_ENV=production
@@ -29,4 +33,3 @@ EXPOSE 5000
 
 # Start the server
 CMD ["node", "server/container-start.js"]
-
