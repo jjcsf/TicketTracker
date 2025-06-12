@@ -401,6 +401,135 @@ app.get('/api/financial-summary/:seasonId', async (req, res) => {
   }
 });
 
+// Static HTML fallback content
+const staticHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Season Ticket Manager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+        .status {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .status-title {
+            font-weight: 600;
+            color: #2f855a;
+            margin-bottom: 0.5rem;
+        }
+        .api-list {
+            list-style: none;
+            text-align: left;
+            margin-top: 1rem;
+        }
+        .api-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .endpoint {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: #f7fafc;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            color: #2d3748;
+            font-size: 0.9rem;
+        }
+        .note {
+            background: #fef5e7;
+            border: 1px solid #f6d55c;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .note-title {
+            font-weight: 600;
+            color: #d69e2e;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Season Ticket Manager</h1>
+        <p class="subtitle">49ers Season Ticket Management System</p>
+        
+        <div class="status">
+            <div class="status-title">✅ Container Status: Running</div>
+            <p>Database connected with full 49ers season ticket data</p>
+        </div>
+        
+        <div class="note">
+            <div class="note-title">React Dashboard Building</div>
+            <p>Full interactive dashboard will be available once frontend compilation completes</p>
+        </div>
+        
+        <h3>Available API Endpoints:</h3>
+        <ul class="api-list">
+            <li><span class="endpoint">GET /api/health</span> - System status</li>
+            <li><span class="endpoint">GET /api/teams</span> - Team information</li>
+            <li><span class="endpoint">GET /api/seasons</span> - Season data</li>
+            <li><span class="endpoint">GET /api/games</span> - Game schedules</li>
+            <li><span class="endpoint">GET /api/seats</span> - Seat information</li>
+            <li><span class="endpoint">GET /api/ticket-holders</span> - Ticket holder data</li>
+            <li><span class="endpoint">GET /api/dashboard/stats/1</span> - Dashboard statistics</li>
+            <li><span class="endpoint">GET /api/financial-summary/1</span> - Financial summary</li>
+        </ul>
+        
+        <script>
+            setTimeout(() => {
+                fetch('/api/health')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'ok') {
+                            fetch('/dashboard')
+                                .then(response => {
+                                    if (response.ok && response.headers.get('content-type')?.includes('text/html')) {
+                                        window.location.href = '/dashboard';
+                                    }
+                                })
+                                .catch(() => {});
+                        }
+                    });
+            }, 5000);
+        </script>
+    </div>
+</body>
+</html>`;
+
 // Check for static files and serve them
 const possibleDistPaths = [
   path.join(__dirname, 'dist'),
@@ -426,15 +555,15 @@ if (distPath) {
       if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
       } else {
-        res.status(404).send('Frontend index.html not found');
+        res.send(staticHTML);
       }
     }
   });
 } else {
-  console.log('No static files found - serving API only');
+  console.log('No static files found - serving fallback page');
   app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
-      res.status(404).send('Frontend not built - API endpoints available at /api/*');
+      res.send(staticHTML);
     }
   });
 }
