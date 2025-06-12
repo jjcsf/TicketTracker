@@ -15,10 +15,19 @@ RUN npm run build
 # Install additional production dependencies for container server
 RUN npm install pg@^8.11.3 cors@^2.8.5
 
+<<<<<<< HEAD
 # Copy the fixed container server
 COPY container-server-fixed.js ./
+=======
+# Copy the interactive container server
+COPY container-interactive-server.js ./
+>>>>>>> 21aa58d (Initial commit)
 
 EXPOSE 5050
 ENV NODE_ENV=production
 
+<<<<<<< HEAD
 CMD ["node", "container-server-fixed.js"]
+=======
+CMD ["node", "container-interactive-server.js"]
+>>>>>>> 21aa58d (Initial commit)

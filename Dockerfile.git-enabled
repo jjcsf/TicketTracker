@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -57,3 +58,41 @@ RUN git init . && \
     git commit -m "Initial container setup" || true
 
 CMD ["node", "server/start.js"]
+=======
+FROM node:20-alpine
+
+# Install git and other essential tools
+RUN apk add --no-cache git
+
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy all source files
+COPY . .
+
+# Build the frontend
+RUN npm run build
+
+# Install additional production dependencies for container server
+RUN npm install pg@^8.11.3 cors@^2.8.5
+
+# Copy the interactive container server
+COPY container-interactive-server.js ./
+
+# Create startup script with git info
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'echo "Starting Season Ticket Management System..."' >> /app/start.sh && \
+    echo 'echo "Git version: $(git --version)"' >> /app/start.sh && \
+    echo 'echo "Database: $DATABASE_URL"' >> /app/start.sh && \
+    echo 'node container-interactive-server.js' >> /app/start.sh && \
+    chmod +x /app/start.sh
+
+EXPOSE 5050
+ENV NODE_ENV=production
+
+# Use the startup script
+CMD ["/app/start.sh"]
+>>>>>>> 21aa58d (Initial commit)

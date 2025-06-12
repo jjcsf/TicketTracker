@@ -3,10 +3,17 @@ version: '3.8'
 services:
   app:
     build:
+<<<<<<< HEAD
       context: .
       dockerfile: Dockerfile.git-enabled
     ports:
       - "8080:5000"
+=======
+      context: https://github.com/jjcsf/TicketTracker.git
+      dockerfile: Dockerfile.git-enabled
+    ports:
+      - "5050:5050"
+>>>>>>> 21aa58d (Initial commit)
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
@@ -15,6 +22,7 @@ services:
       - PGPASSWORD=ticketpass123
       - PGHOST=postgres
       - PGPORT=5432
+<<<<<<< HEAD
       # Git repository configuration
       - GIT_REPO_URL=https://github.com/your-username/ticket-management.git
       - GIT_BRANCH=main
@@ -23,6 +31,8 @@ services:
       - app_data:/app
       # Optional: SSH keys for private repositories
       - ./ssh_keys:/root/.ssh:ro
+=======
+>>>>>>> 21aa58d (Initial commit)
     depends_on:
       - postgres
     restart: unless-stopped
@@ -39,6 +49,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+<<<<<<< HEAD
   # Optional: Git webhook service for automatic updates
   webhook:
     image: adnanh/webhook:latest
@@ -55,3 +66,7 @@ services:
 volumes:
   postgres_data:
   app_data:
+=======
+volumes:
+  postgres_data:
+>>>>>>> 21aa58d (Initial commit)

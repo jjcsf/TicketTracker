@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Git-Based Container Deployment Guide
 
 ## Overview
@@ -99,3 +100,62 @@ For your use case, I recommend **Method 1 (Manual Git Updates)** because:
 4. Test the update process
 
 This gives you a production-ready deployment that can be easily updated from your Git repository while maintaining full control and safety through automatic backups.
+=======
+# Git Deployment for Container Station
+
+## Docker Compose Script
+Save this as `docker-compose.yml` in Container Station:
+
+```yaml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: https://github.com/jjcsf/TicketTracker.git
+      dockerfile: Dockerfile.git-enabled
+    ports:
+      - "5050:5050"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
+      - PGDATABASE=ticket_management
+      - PGUSER=postgres
+      - PGPASSWORD=ticketpass123
+      - PGHOST=postgres
+      - PGPORT=5432
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=ticket_management
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=ticketpass123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+```
+
+## Deployment Steps
+
+1. **Publish Latest Code**: Use Replit Version Control tab to commit and push
+2. **Create Container**: Use the compose script above in Container Station
+3. **Access Dashboard**: Navigate to `http://your-nas-ip:5050`
+
+## Key Features
+- Pulls directly from GitHub repository
+- Git-enabled Docker image (includes Git tools)
+- Interactive React dashboard with authentication bypass
+- PostgreSQL database with 49ers season ticket data
+- Full navigation and form functionality
+
+This script uses `Dockerfile.git-enabled` which includes Git installation to resolve the previous error.
+>>>>>>> 21aa58d (Initial commit)

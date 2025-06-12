@@ -1,5 +1,6 @@
 #!/bin/bash
 
+<<<<<<< HEAD
 # Git-based update script for Container Station deployment
 # Place this script in your container and run to update from git repository
 
@@ -56,3 +57,59 @@ fi
 
 log "Update completed successfully!"
 log "Backup saved at: $BACKUP_DIR"
+=======
+# Script to update Container Station from Git repository
+echo "Setting up Git-based container updates..."
+
+# Create update script for your NAS
+cat > container-git-update.sh << 'EOF'
+#!/bin/bash
+
+# Update Container Station deployment from Git
+echo "Updating Season Ticket Tracker from GitHub..."
+
+# Navigate to projects directory
+cd /share/Container/projects/
+
+# Remove old version if it exists
+if [ -d "SeasonTicketTracker" ]; then
+    echo "Removing old deployment..."
+    rm -rf SeasonTicketTracker
+fi
+
+# Clone fresh copy from GitHub
+echo "Cloning latest version..."
+git clone https://github.com/jjcsf/SeasonTicketTracker.git
+
+# Navigate to project directory
+cd SeasonTicketTracker
+
+# Stop existing container
+echo "Stopping existing container..."
+docker-compose down 2>/dev/null || true
+
+# Build and start updated container
+echo "Starting updated container..."
+docker-compose up -d --build
+
+echo "Container updated successfully!"
+echo "Access at: http://your-nas-ip:5050"
+EOF
+
+echo "Created container-git-update.sh"
+echo "Upload this script to your NAS and run it to update from Git"
+
+# Also create a webhook script for automatic updates
+cat > webhook-update.sh << 'EOF'
+#!/bin/bash
+
+# Webhook script for automatic updates
+# Place this in your NAS web server directory
+
+cd /share/Container/projects/SeasonTicketTracker
+git pull origin main
+docker-compose up -d --build
+EOF
+
+echo "Created webhook-update.sh for automatic updates"
+>>>>>>> 21aa58d (Initial commit)

@@ -1,0 +1,24 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files and install ALL dependencies (including dev deps for build)
+COPY package*.json ./
+RUN npm ci
+
+# Copy all source files
+COPY . .
+
+# Build the frontend
+RUN npm run build
+
+# Install additional production dependencies for container server
+RUN npm install pg@^8.11.3 cors@^2.8.5
+
+# Copy the interactive container server
+COPY container-interactive-server.js ./
+
+EXPOSE 5050
+ENV NODE_ENV=production
+
+CMD ["node", "container-interactive-server.js"]

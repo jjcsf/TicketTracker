@@ -3,10 +3,17 @@ version: '3.8'
 services:
   app:
     build:
+<<<<<<< HEAD
       context: /share/Container/projects/SeasonTicketTracker
       dockerfile: Dockerfile
     ports:
       - "5050:5000"
+=======
+      context: https://github.com/jjcsf/TicketTracker.git
+      dockerfile: Dockerfile
+    ports:
+      - "5050:5050"
+>>>>>>> 21aa58d (Initial commit)
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management

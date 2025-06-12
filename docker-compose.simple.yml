@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+<<<<<<< HEAD
   app:
     build:
       context: .
@@ -10,6 +11,20 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
+=======
+  season-ticket-app:
+    image: jjcsf/season-ticket-manager:latest
+    ports:
+      - "5050:5050"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
+      - PGDATABASE=ticket_management
+      - PGUSER=postgres
+      - PGPASSWORD=ticketpass123
+      - PGHOST=postgres
+      - PGPORT=5432
+>>>>>>> 21aa58d (Initial commit)
     depends_on:
       - postgres
     restart: unless-stopped
