@@ -1,25 +1,32 @@
-FROM node:20-alpine
+# Use a more compatible base image
+FROM node:20-slim
 
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json ./
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Install production dependencies
 RUN npm ci --only=production
 
-# Copy all source files
+# Copy the rest of the application
 COPY . .
 
-# Build the frontend
+# Build the frontend (if applicable)
 RUN npm run build
 
-# Install additional production dependencies for container server
+# Install additional production dependencies
 RUN npm install pg@^8.11.3 cors@^2.8.5
 
-# Copy the container server
+# Ensure the container-start.js file exists and is copied correctly
+# Adjust the path if it's located in a subdirectory
 COPY server/container-start.js ./server/container-start.js
 
-EXPOSE 5000
+# Set environment and expose port
 ENV NODE_ENV=production
+EXPOSE 5000
 
-# Use the container server that serves the built React app
+# Start the server
 CMD ["node", "server/container-start.js"]
+
