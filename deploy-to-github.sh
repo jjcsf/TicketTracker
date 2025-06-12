@@ -1,41 +1,44 @@
 #!/bin/bash
 
-# Deploy Season Ticket Manager to GitHub
-echo "🚀 Deploying Season Ticket Manager to GitHub..."
+# Manual deployment script for GitHub upload
+echo "=== Season Ticket Manager - Container Fix Deployment ==="
+echo "Created: $(date)"
+echo ""
 
-# Check if we're in a git repository
-if [ ! -d ".git" ]; then
-    echo "❌ Not in a git repository"
-    exit 1
-fi
+echo "Files to upload to GitHub (https://github.com/jjcsf/TicketTracker):"
+echo "1. container-production-server.js"
+echo "2. Dockerfile.simple" 
+echo "3. docker-compose.published.yml"
+echo ""
 
-# Add all files
-git add .
+echo "Upload Instructions:"
+echo "1. Go to https://github.com/jjcsf/TicketTracker"
+echo "2. Click 'Add file' > 'Upload files'"
+echo "3. Drag the 3 files listed above"
+echo "4. Commit message: 'Fix container syntax errors with production server'"
+echo "5. Click 'Commit changes'"
+echo ""
 
-# Create commit with deployment message
-git commit -m "Container deployment ready - ES modules fixed
+echo "After GitHub Actions builds new image (5-10 minutes):"
+echo "docker pull jjcsf/season-ticket-manager:latest"
+echo "docker-compose down"
+echo "docker-compose up -d"
+echo ""
 
-- Fixed ES module compatibility in container-interactive-server.js
-- Updated Dockerfile.simple for container deployment
-- Added GitHub Actions workflow for Docker publishing
-- Enhanced authentication bypass for containers
-- Complete PostgreSQL schema with sample data
-- Docker Compose configurations for Container Station"
+echo "=== File Contents Ready for Upload ==="
 
-# Push to GitHub
-echo "📤 Pushing to GitHub..."
-git push origin main
+echo ""
+echo "--- container-production-server.js (15,915 bytes) ---"
+ls -la container-production-server.js
 
-if [ $? -eq 0 ]; then
-    echo "✅ Successfully pushed to GitHub!"
-    echo "🔄 GitHub Actions will now build Docker image: jjcsf/season-ticket-manager:latest"
-    echo "⏱️  Build time: ~5-10 minutes"
-    echo "🔗 Monitor at: https://github.com/jjcsf/TicketTracker/actions"
-else
-    echo "❌ Failed to push to GitHub"
-    echo "💡 Try manually uploading these key files to GitHub:"
-    echo "   - container-interactive-server.js"
-    echo "   - Dockerfile.simple" 
-    echo "   - .github/workflows/docker-publish.yml"
-    echo "   - docker-compose.published.yml"
-fi
+echo ""
+echo "--- Dockerfile.simple (492 bytes) ---"
+cat Dockerfile.simple
+
+echo ""
+echo "--- docker-compose.published.yml (755 bytes) ---"
+cat docker-compose.published.yml
+
+echo ""
+echo "=== Deployment Ready ==="
+echo "The syntax error will be resolved once new Docker image is built and pulled."
