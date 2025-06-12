@@ -1,44 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-import express from 'express';
-import cors from 'cors';
-import pg from 'pg';
-
-const { Pool } = pg;
-
-const app = express();
-const port = process.env.PORT || 5000;
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-app.use(cors());
-app.use(express.json());
-
-app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ time: result.rows[0].now });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Database error');
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-
-  await initDatabase();
-  console.log('Application ready!');
-});
-=======
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const { Pool } = require('pg');
-=======
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
@@ -48,14 +7,12 @@ import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
->>>>>>> 37125e6 (Initialize database and backend server for production environment)
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Database connection with retry logic
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:ticketpass123@postgres:5432/ticket_management',
   max: 20,
@@ -63,16 +20,15 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
-// Initialize database with full schema
 async function initDatabase() {
   let retries = 5;
   while (retries > 0) {
     try {
       await pool.query('SELECT 1');
-      console.log('Database connection established');
+      console.log('Database connected successfully');
       break;
     } catch (error) {
-      console.log(`Database connection failed, retrying... (${retries} attempts left)`);
+      console.log(`Database retry ${retries}: ${error.message}`);
       retries--;
       if (retries === 0) throw error;
       await new Promise(resolve => setTimeout(resolve, 3000));
@@ -81,7 +37,6 @@ async function initDatabase() {
 
   try {
     await pool.query(`
-      -- Create all tables
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR PRIMARY KEY,
         email VARCHAR UNIQUE,
@@ -202,7 +157,6 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- Insert sample data
       INSERT INTO teams (name, city, league) VALUES 
         ('49ers', 'San Francisco', 'NFL'),
         ('Giants', 'San Francisco', 'MLB')
@@ -266,25 +220,23 @@ async function initDatabase() {
         (2, 2, 520.00, 'Game attendance payout - Seahawks')
       ON CONFLICT DO NOTHING;
     `);
-    console.log('Database schema and sample data initialized');
+    console.log('Database initialized with schema and sample data');
   } catch (error) {
     console.error('Database initialization error:', error);
   }
 }
 
-// Request logging
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
     if (req.path.startsWith('/api')) {
-      console.log(`${new Date().toLocaleTimeString()} [express] ${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
+      console.log(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
     }
   });
   next();
 });
 
-// Authentication bypass for container
 app.get('/api/auth/user', (req, res) => {
   res.json({
     id: 'container-admin',
@@ -294,25 +246,10 @@ app.get('/api/auth/user', (req, res) => {
   });
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Container application running with database' });
+  res.json({ status: 'ok', message: 'Season Ticket Manager running' });
 });
 
-// Complete API implementation
-const createApiEndpoint = (tableName, fields) => {
-  app.get(`/api/${tableName}`, async (req, res) => {
-    try {
-      const result = await pool.query(`SELECT * FROM ${tableName} ORDER BY created_at DESC`);
-      res.json(result.rows);
-    } catch (error) {
-      console.error(`Error fetching ${tableName}:`, error);
-      res.status(500).json({ error: `Failed to fetch ${tableName}` });
-    }
-  });
-};
-
-// Teams
 app.get('/api/teams', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM teams ORDER BY created_at DESC');
@@ -322,11 +259,10 @@ app.get('/api/teams', async (req, res) => {
   }
 });
 
-// Seasons
 app.get('/api/seasons', async (req, res) => {
   try {
     const { teamId } = req.query;
-    let query = `SELECT s.*, t.name as team_name FROM seasons s LEFT JOIN teams t ON s.team_id = t.id`;
+    let query = 'SELECT s.*, t.name as team_name FROM seasons s LEFT JOIN teams t ON s.team_id = t.id';
     let params = [];
     
     if (teamId) {
@@ -342,7 +278,6 @@ app.get('/api/seasons', async (req, res) => {
   }
 });
 
-// Games
 app.get('/api/games', async (req, res) => {
   try {
     const { seasonId } = req.query;
@@ -367,7 +302,6 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
-// Ticket holders
 app.get('/api/ticket-holders', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM ticket_holders ORDER BY name');
@@ -377,7 +311,6 @@ app.get('/api/ticket-holders', async (req, res) => {
   }
 });
 
-// Seats
 app.get('/api/seats', async (req, res) => {
   try {
     const { teamId } = req.query;
@@ -401,7 +334,6 @@ app.get('/api/seats', async (req, res) => {
   }
 });
 
-// Seat ownership
 app.get('/api/seat-ownership', async (req, res) => {
   try {
     const { seasonId } = req.query;
@@ -427,7 +359,6 @@ app.get('/api/seat-ownership', async (req, res) => {
   }
 });
 
-// Game pricing
 app.get('/api/game-pricing', async (req, res) => {
   try {
     const { gameId } = req.query;
@@ -452,7 +383,6 @@ app.get('/api/game-pricing', async (req, res) => {
   }
 });
 
-// Game attendance
 app.get('/api/game-attendance', async (req, res) => {
   try {
     const { gameId } = req.query;
@@ -478,16 +408,6 @@ app.get('/api/game-attendance', async (req, res) => {
   }
 });
 
-// Transfers
-app.get('/api/transfers', async (req, res) => {
-  try {
-    res.json([]);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch transfers' });
-  }
-});
-
-// Dashboard stats
 app.get('/api/dashboard/stats/:seasonId', async (req, res) => {
   try {
     const { seasonId } = req.params;
@@ -530,7 +450,6 @@ app.get('/api/dashboard/stats/:seasonId', async (req, res) => {
   }
 });
 
-// Financial summary
 app.get('/api/financial-summary/:seasonId', async (req, res) => {
   try {
     const { seasonId } = req.params;
@@ -548,55 +467,36 @@ app.get('/api/financial-summary/:seasonId', async (req, res) => {
       HAVING COUNT(so.id) > 0
       ORDER BY th.name
     `, [seasonId]);
-    
+
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch financial summary' });
   }
 });
 
-// Serve the built React application
-const clientDistPath = path.resolve('client/dist');
-console.log('Serving static files from:', clientDistPath);
+app.use(express.static(path.join(__dirname, 'dist')));
 
-// Check if dist directory exists
-const fs = require('fs');
-if (!fs.existsSync(clientDistPath)) {
-  console.error('Client dist directory not found at:', clientDistPath);
-  console.log('Available directories:', fs.readdirSync(path.resolve('.')));
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  }
+});
+
+const PORT = process.env.PORT || 5050;
+
+async function startServer() {
+  try {
+    await initDatabase();
+    
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Season Ticket Manager running on port ${PORT}`);
+      console.log(`Access at: http://localhost:${PORT}`);
+      console.log(`Dashboard: http://localhost:${PORT}/dashboard`);
+    });
+  } catch (error) {
+    console.error('Server startup failed:', error);
+    process.exit(1);
+  }
 }
 
-app.use(express.static(clientDistPath));
-
-// SPA catch-all route
-app.get('*', (req, res) => {
-  const indexPath = path.join(clientDistPath, 'index.html');
-  console.log('Serving index.html from:', indexPath);
-  
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      console.error('Error serving index.html:', err);
-      res.status(500).send(`
-        <html>
-          <head><title>Application Error</title></head>
-          <body>
-            <h1>Application Build Error</h1>
-            <p>The React application was not built properly.</p>
-            <p>Error: ${err.message}</p>
-            <p>Looking for: ${indexPath}</p>
-          </body>
-        </html>
-      `);
-    }
-  });
-});
-
-const port = 5000;
-app.listen(port, '0.0.0.0', async () => {
-  console.log(`Container application running on port ${port}`);
-  console.log(`Access the application at http://your-nas-ip:8080`);
-  console.log('Initializing database...');
-  await initDatabase();
-  console.log('Application ready!');
-});
->>>>>>> 21aa58d (Initial commit)
+startServer();

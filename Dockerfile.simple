@@ -17,6 +17,7 @@ RUN npm install pg@^8.11.3 cors@^2.8.5
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Copy the fixed container server
 COPY container-server-fixed.js ./
 =======
@@ -27,10 +28,15 @@ COPY container-interactive-server.js ./
 # Copy the fixed container server
 COPY container-server-fixed.js ./
 >>>>>>> af47c2a (Resolve container startup error and establish full database schema)
+=======
+# Copy the production container server
+COPY container-production-server.js ./
+>>>>>>> 37125e6 (Initialize database and backend server for production environment)
 
 EXPOSE 5050
 ENV NODE_ENV=production
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 CMD ["node", "container-server-fixed.js"]
@@ -40,3 +46,6 @@ CMD ["node", "container-interactive-server.js"]
 =======
 CMD ["node", "container-server-fixed.js"]
 >>>>>>> af47c2a (Resolve container startup error and establish full database schema)
+=======
+CMD ["node", "container-production-server.js"]
+>>>>>>> 37125e6 (Initialize database and backend server for production environment)
