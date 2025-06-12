@@ -84,11 +84,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Season Ticket Manager running' });
 });
 
-app.use(express.static(path.join(__dirname, 'dist')));
+// Serve static files from the built frontend
+const distPath = path.join(__dirname, 'dist');
+console.log('Looking for static files at:', distPath);
+
+app.use(express.static(distPath));
 
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    const indexPath = path.join(distPath, 'index.html');
+    try {
+      res.sendFile(indexPath);
+    } catch (error) {
+      console.error('Static file error:', error);
+      console.error('Attempted path:', indexPath);
+      res.status(404).send('Frontend files not found - container may need rebuild');
+    }
   }
 });
 
