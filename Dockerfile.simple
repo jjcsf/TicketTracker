@@ -16,18 +16,27 @@ RUN npm run build
 RUN npm install pg@^8.11.3 cors@^2.8.5
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Copy the fixed container server
 COPY container-server-fixed.js ./
 =======
 # Copy the interactive container server
 COPY container-interactive-server.js ./
 >>>>>>> 21aa58d (Initial commit)
+=======
+# Copy the fixed container server
+COPY container-server-fixed.js ./
+>>>>>>> af47c2a (Resolve container startup error and establish full database schema)
 
 EXPOSE 5050
 ENV NODE_ENV=production
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 CMD ["node", "container-server-fixed.js"]
 =======
 CMD ["node", "container-interactive-server.js"]
 >>>>>>> 21aa58d (Initial commit)
+=======
+CMD ["node", "container-server-fixed.js"]
+>>>>>>> af47c2a (Resolve container startup error and establish full database schema)
