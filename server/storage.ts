@@ -232,6 +232,42 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  // Local authentication operations
+  async getLocalUser(id: number): Promise<LocalUser | undefined> {
+    const [user] = await db.select().from(localUsers).where(eq(localUsers.id, id));
+    return user;
+  }
+
+  async getLocalUserByUsername(username: string): Promise<LocalUser | undefined> {
+    const [user] = await db.select().from(localUsers).where(eq(localUsers.username, username));
+    return user;
+  }
+
+  async getLocalUserByEmail(email: string): Promise<LocalUser | undefined> {
+    const [user] = await db.select().from(localUsers).where(eq(localUsers.email, email));
+    return user;
+  }
+
+  async createLocalUser(userData: InsertLocalUser): Promise<LocalUser> {
+    const [user] = await db
+      .insert(localUsers)
+      .values(userData)
+      .returning();
+    return user;
+  }
+
+  async updateLocalUser(id: number, userData: Partial<InsertLocalUser>): Promise<LocalUser | undefined> {
+    const [user] = await db
+      .update(localUsers)
+      .set({
+        ...userData,
+        updatedAt: new Date(),
+      })
+      .where(eq(localUsers.id, id))
+      .returning();
+    return user;
+  }
+
   // Team operations
   async getTeams(): Promise<Team[]> {
     return await db.select().from(teams).orderBy(teams.name);
