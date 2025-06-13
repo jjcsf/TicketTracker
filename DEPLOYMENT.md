@@ -16,9 +16,49 @@ Create a `.env` file in the project root:
 ```env
 DATABASE_URL=postgresql://username:password@host:port/database
 SESSION_SECRET=your-session-secret-key
+REPLIT_DOMAINS=your-domain.com,localhost:5050
+REPL_ID=your-repl-id
+ISSUER_URL=https://replit.com/oidc
 NODE_ENV=production
 PORT=5050
 ```
+
+**Required for Authentication:**
+- `REPLIT_DOMAINS`: Comma-separated list of domains where the app will be deployed
+- `REPL_ID`: Your Replit application ID for OAuth (obtain from Replit dashboard)
+- `ISSUER_URL`: Replit's OpenID Connect issuer URL (default: https://replit.com/oidc)
+- `SESSION_SECRET`: Secure random string for session encryption (generate with: `openssl rand -base64 32`)
+
+## Authentication Setup
+
+### Getting Replit OAuth Credentials
+
+1. **Create a Replit Account**: Sign up at https://replit.com
+2. **Create a New Repl**: Set up a development environment
+3. **Get REPL_ID**: Found in your Repl's URL or settings
+4. **Configure Domains**: Add your production domains to REPLIT_DOMAINS
+
+### Authentication Flow
+
+The application uses Replit's OpenID Connect for secure authentication:
+
+1. Users click "Login" and are redirected to Replit
+2. After authentication, users are redirected back to your app
+3. Session is established with secure cookies
+4. Protected routes require valid authentication
+
+### Login URLs
+
+- **Development**: `http://localhost:5050/api/login`
+- **Production**: `https://your-domain.com/api/login`
+- **Logout**: `/api/logout`
+
+### User Session Management
+
+- Sessions are stored in PostgreSQL with automatic cleanup
+- Session duration: 7 days
+- Secure cookies with httpOnly and secure flags
+- Automatic token refresh for extended sessions
 
 ### 2. Build and Deploy with Docker Compose
 ```bash

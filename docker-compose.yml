@@ -25,6 +25,10 @@ services:
       PORT: 5050
       DATABASE_URL: postgresql://postgres:ticketpass123@postgres:5432/ticket_management
       NODE_ENV: production
+      SESSION_SECRET: your-secure-session-secret-change-this
+      REPLIT_DOMAINS: localhost:5050,your-domain.com
+      REPL_ID: your-repl-id-here
+      ISSUER_URL: https://replit.com/oidc
     depends_on:
       postgres:
         condition: service_healthy
