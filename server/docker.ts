@@ -16,6 +16,12 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files from the dist/public directory (Vite build output)
 app.use(express.static(path.join(__dirname, "public")));
 
+// Add debugging middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`[docker] ${req.method} ${req.path}`);
+  next();
+});
+
 // Setup routes with local authentication
 registerContainerAuthRoutes(app).then((server) => {
   server.listen(port, "0.0.0.0", () => {

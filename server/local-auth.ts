@@ -43,6 +43,7 @@ const loginSchema = z.object({
 });
 
 export function setupLocalAuth(app: Express) {
+  console.log("[auth] Setting up local authentication middleware");
   const PostgresSessionStore = connectPg(session);
   
   const sessionSettings: session.SessionOptions = {
@@ -97,7 +98,9 @@ export function setupLocalAuth(app: Express) {
   });
 
   // Registration endpoint
+  console.log("[auth] Registering /api/auth/register route");
   app.post("/api/auth/register", async (req, res, next) => {
+    console.log("[auth] POST /api/auth/register called with body:", req.body);
     try {
       const validatedData = registerSchema.parse(req.body);
       
@@ -146,7 +149,9 @@ export function setupLocalAuth(app: Express) {
   });
 
   // Login endpoint
+  console.log("[auth] Registering /api/auth/login route");
   app.post("/api/auth/login", (req, res, next) => {
+    console.log("[auth] POST /api/auth/login called with body:", req.body);
     try {
       loginSchema.parse(req.body);
     } catch (error) {
@@ -181,7 +186,9 @@ export function setupLocalAuth(app: Express) {
   });
 
   // Logout endpoint
+  console.log("[auth] Registering /api/auth/logout route");
   app.post("/api/auth/logout", (req, res, next) => {
+    console.log("[auth] POST /api/auth/logout called");
     req.logout((err) => {
       if (err) return next(err);
       res.json({ message: "Logged out successfully" });
@@ -189,7 +196,9 @@ export function setupLocalAuth(app: Express) {
   });
 
   // Get current user endpoint
+  console.log("[auth] Registering /api/auth/user route");
   app.get("/api/auth/user", (req, res) => {
+    console.log("[auth] GET /api/auth/user called");
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
