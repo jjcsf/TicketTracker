@@ -30,23 +30,19 @@ services:
       - PORT=5050
       - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
       - NODE_ENV=production
-      - SESSION_SECRET=CHANGE-THIS-TO-SECURE-RANDOM-STRING-32-CHARS
-      - REPLIT_DOMAINS=localhost:5050,your-nas-ip:5050,your-domain.com
-      - REPL_ID=your-repl-id-here
+      - SESSION_SECRET=REPLACE-WITH-32-CHAR-RANDOM-STRING
+      - REPLIT_DOMAINS=localhost:5050,YOUR-NAS-IP:5050
+      - REPL_ID=YOUR-REPL-ID-HERE
       - ISSUER_URL=https://replit.com/oidc
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-    volumes:
-      - season_tickets_logs:/app/logs
     networks:
       - season-tickets-network
 
 volumes:
   season_tickets_db:
-    driver: local
-  season_tickets_logs:
     driver: local
 
 networks:
