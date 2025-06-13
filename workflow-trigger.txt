@@ -1,9 +1,0 @@
-Trigger GitHub Actions workflow by adding this timestamp: 2025-06-12-01:25:45
-
-This file triggers the workflow to build jjcsf/season-ticket-manager:latest
-
-Changes include:
-- Fixed ES module error in container server
-- Updated Dockerfile for proper container deployment
-- Added comprehensive Docker Compose configurations
-- Enhanced authentication bypass for container environments
