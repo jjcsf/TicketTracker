@@ -14,13 +14,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the dist/public directory (Vite build output)
-app.use(express.static(path.join(__dirname, "../dist/public")));
+app.use(express.static(path.join(__dirname, "public")));
 
 // Setup routes with local authentication
 registerContainerAuthRoutes(app).then((server) => {
   // Serve the React app for all non-API routes
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../dist/public/index.html"));
+    res.sendFile(path.join(__dirname, "public/index.html"));
   });
 
   server.listen(port, "0.0.0.0", () => {
