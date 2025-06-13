@@ -4,20 +4,29 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
 
-# Copy source and existing build
-COPY . .
+# Install only production dependencies
+RUN npm ci --only=production && npm cache clean --force
 
-# Build only the server component
-RUN npx esbuild server/docker.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/docker.js
+# Copy the minimal container file
+COPY server/minimal-container.ts ./
 
-# Use existing frontend build (already has proper auth logic)
-# Frontend will be served from dist/public
+# Install typescript and esbuild for building
+RUN npm install -g typescript esbuild
+
+# Build the application
+RUN esbuild minimal-container.ts --platform=node --packages=external --bundle --format=cjs --outfile=app.js
+
+# Remove build tools
+RUN npm uninstall -g typescript esbuild
+
+# Verify build
+RUN ls -la app.js && head -5 app.js
 
 EXPOSE 5050
 
 ENV NODE_ENV=production
-ENV VITE_AUTH_TYPE=local
+ENV PORT=5050
+ENV SESSION_SECRET=container-session-secret-key-12345
 
-CMD ["node", "dist/docker.js"]
+CMD ["node", "app.js"]
