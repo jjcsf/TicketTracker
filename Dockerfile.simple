@@ -15,10 +15,10 @@ RUN npm run build
 # Install additional production dependencies for container server
 RUN npm install pg@^8.11.3 cors@^2.8.5
 
-# Copy the full deployment server
-COPY container-full-deployment.js ./
+# Copy the dashboard server
+COPY container-dashboard-server.js ./
 
 EXPOSE 5050
 ENV NODE_ENV=production
 
-CMD ["node", "container-full-deployment.js"]
+CMD ["node", "container-dashboard-server.js"]
