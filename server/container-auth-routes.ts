@@ -8,8 +8,12 @@ import { fileURLToPath } from "url";
 // Container-specific routes with local authentication
 export async function registerContainerAuthRoutes(app: Express): Promise<Server> {
   
+  console.log("[container] Registering container auth routes");
+  
   // Setup local authentication middleware
   setupLocalAuth(app);
+  
+  console.log("[container] Authentication middleware setup complete");
 
   // Protected API endpoints - all require authentication
   app.get('/api/teams', requireAuth, async (req, res) => {

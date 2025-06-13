@@ -213,6 +213,22 @@ export function setupLocalAuth(app: Express) {
       role: user.role,
     });
   });
+
+  // Debug route to list all registered routes
+  app.get("/api/debug/routes", (req, res) => {
+    const routes: any[] = [];
+    app._router.stack.forEach((middleware: any) => {
+      if (middleware.route) {
+        routes.push({
+          method: Object.keys(middleware.route.methods)[0].toUpperCase(),
+          path: middleware.route.path
+        });
+      }
+    });
+    res.json({ routes, message: "Authentication routes registered" });
+  });
+
+  console.log("[auth] All authentication routes registered successfully");
 }
 
 // Authentication middleware
