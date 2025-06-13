@@ -1,0 +1,23 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy source and existing build
+COPY . .
+
+# Build only the server component
+RUN npx esbuild server/docker.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/docker.js
+
+# Use existing frontend build (already has proper auth logic)
+# Frontend will be served from dist/public
+
+EXPOSE 5050
+
+ENV NODE_ENV=production
+ENV VITE_AUTH_TYPE=local
+
+CMD ["node", "dist/docker.js"]
