@@ -2,19 +2,29 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files and install production dependencies
+# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --only=production && npm cache clean --force
 
-# Copy source code
-COPY . .
+# Copy the static server file
+COPY server/static-server.ts ./
 
-# Build the static container server
-RUN npx esbuild server/static-container.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/static-container.js
+# Install build tools
+RUN npm install -g esbuild
+
+# Build the static server
+RUN esbuild static-server.ts --platform=node --packages=external --bundle --format=esm --outfile=server.mjs
+
+# Remove build tools
+RUN npm uninstall -g esbuild
+
+# Verify build
+RUN ls -la server.mjs && echo "Build size: $(wc -c < server.mjs) bytes"
 
 EXPOSE 5050
 
 ENV NODE_ENV=production
 ENV PORT=5050
+ENV SESSION_SECRET=static-server-production-secret
 
-CMD ["node", "dist/static-container.js"]
+CMD ["node", "server.mjs"]
