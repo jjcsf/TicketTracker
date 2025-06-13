@@ -1,10 +1,11 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import AppContainer from "./AppContainer.tsx";
+import AppContainer from "./AppContainer";
 import "./index.css";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <AppContainer />
-  </StrictMode>,
-);
+console.log('[main-container] Starting Season Ticket Manager with local authentication');
+
+try {
+  createRoot(document.getElementById("root")!).render(<AppContainer />);
+} catch (error) {
+  console.error('[main-container] Failed to render app:', error);
+}
