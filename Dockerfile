@@ -10,12 +10,10 @@ RUN npm ci
 COPY . .
 
 # Build the frontend with local auth environment
-ENV NODE_ENV=production
-ENV VITE_AUTH_TYPE=local
-RUN npm run build
+RUN NODE_ENV=production VITE_AUTH_TYPE=local npm run build
 
-# Verify frontend build succeeded
-RUN ls -la dist/ && test -f dist/index.html
+# Verify frontend build succeeded (Vite outputs to dist/public)
+RUN ls -la dist/public/ && test -f dist/public/index.html
 
 # Build the container-specific server
 RUN npx esbuild server/docker.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/docker.js
