@@ -15,13 +15,13 @@ COPY server/minimal-container.ts ./
 RUN npm install -g typescript esbuild
 
 # Build the application
-RUN esbuild minimal-container.ts --platform=node --packages=external --bundle --format=cjs --outfile=app.js
+RUN esbuild minimal-container.ts --platform=node --packages=external --bundle --format=esm --outfile=app.mjs
 
 # Remove build tools
 RUN npm uninstall -g typescript esbuild
 
 # Verify build
-RUN ls -la app.js && head -5 app.js
+RUN ls -la app.mjs && head -5 app.mjs
 
 EXPOSE 5050
 
@@ -29,4 +29,4 @@ ENV NODE_ENV=production
 ENV PORT=5050
 ENV SESSION_SECRET=container-session-secret-key-12345
 
-CMD ["node", "app.js"]
+CMD ["node", "app.mjs"]

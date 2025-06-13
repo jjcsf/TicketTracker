@@ -1,10 +1,10 @@
-const { spawn } = require('child_process');
-const http = require('http');
+import { spawn } from 'child_process';
+import http from 'http';
 
 console.log('Testing minimal container locally...');
 
 // Start the server
-const server = spawn('node', ['dist/minimal-app.js'], {
+const server = spawn('node', ['dist/minimal-app.mjs'], {
   env: { ...process.env, PORT: '5060' }
 });
 
