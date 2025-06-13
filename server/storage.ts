@@ -1,5 +1,6 @@
 import {
   users,
+  localUsers,
   teams,
   seasons,
   games,
@@ -15,6 +16,8 @@ import {
   seatValuePredictions,
   type User,
   type UpsertUser,
+  type LocalUser,
+  type InsertLocalUser,
   type Team,
   type Season,
   type Game,
@@ -54,6 +57,13 @@ export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+
+  // Local authentication operations
+  getLocalUser(id: number): Promise<LocalUser | undefined>;
+  getLocalUserByUsername(username: string): Promise<LocalUser | undefined>;
+  getLocalUserByEmail(email: string): Promise<LocalUser | undefined>;
+  createLocalUser(user: InsertLocalUser): Promise<LocalUser>;
+  updateLocalUser(id: number, user: Partial<InsertLocalUser>): Promise<LocalUser | undefined>;
 
   // Team operations
   getTeams(): Promise<Team[]>;

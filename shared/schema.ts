@@ -39,6 +39,20 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Local authentication users table
+export const localUsers = pgTable("local_users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 50 }).unique().notNull(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  role: varchar("role", { length: 20 }).default("user"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Teams
 export const teams = pgTable("teams", {
   id: serial("id").primaryKey(),
@@ -359,10 +373,12 @@ export const insertGameAttendanceSchema = createInsertSchema(gameAttendance).omi
 export const insertGamePricingSchema = createInsertSchema(gamePricing).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertTeamPerformanceSchema = createInsertSchema(teamPerformance).omit({ id: true, createdAt: true, lastUpdated: true });
 export const insertSeatValuePredictionSchema = createInsertSchema(seatValuePredictions).omit({ id: true, createdAt: true, calculatedAt: true });
+export const insertLocalUserSchema = createInsertSchema(localUsers).omit({ id: true, createdAt: true, updatedAt: true });
 
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type LocalUser = typeof localUsers.$inferSelect;
 export type Team = typeof teams.$inferSelect;
 export type Season = typeof seasons.$inferSelect;
 export type Game = typeof games.$inferSelect;
@@ -390,3 +406,4 @@ export type InsertGameAttendance = z.infer<typeof insertGameAttendanceSchema>;
 export type InsertGamePricing = z.infer<typeof insertGamePricingSchema>;
 export type InsertTeamPerformance = z.infer<typeof insertTeamPerformanceSchema>;
 export type InsertSeatValuePrediction = z.infer<typeof insertSeatValuePredictionSchema>;
+export type InsertLocalUser = z.infer<typeof insertLocalUserSchema>;
