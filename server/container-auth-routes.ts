@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupLocalAuth, requireAuth } from "./local-auth";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Container-specific routes with local authentication
 export async function registerContainerAuthRoutes(app: Express): Promise<Server> {
@@ -198,6 +200,13 @@ export async function registerContainerAuthRoutes(app: Express): Promise<Server>
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch owner balances" });
     }
+  });
+
+  // Serve the React app for all non-API routes (SPA routing)
+  app.get("*", (req, res) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    res.sendFile(path.join(__dirname, "public/index.html"));
   });
 
   const httpServer = createServer(app);
