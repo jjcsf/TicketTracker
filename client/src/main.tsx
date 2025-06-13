@@ -1,3 +1,8 @@
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import AppContainer from "./AppContainer";
+import "./index.css";
+
 console.log('[main] Starting main.tsx execution');
 
 // Global error handler
@@ -17,19 +22,6 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 
 try {
-  console.log('[main] Importing React dependencies...');
-  const { createRoot } = await import("react-dom/client");
-  console.log('[main] React createRoot imported successfully');
-  
-  console.log('[main] Importing App components...');
-  const App = (await import("./App")).default;
-  const AppContainer = (await import("./AppContainer")).default;
-  console.log('[main] App components imported successfully');
-  
-  console.log('[main] Importing CSS...');
-  await import("./index.css");
-  console.log('[main] CSS imported successfully');
-
   // Use container auth only when explicitly set to local
   const useLocalAuth = import.meta.env.VITE_AUTH_TYPE === 'local';
 
@@ -53,7 +45,7 @@ try {
   root.render(useLocalAuth ? <AppContainer /> : <App />);
   console.log('[main] App rendered successfully');
 
-} catch (error) {
+} catch (error: any) {
   console.error('[main] Critical error during app initialization:', error);
   console.error('[main] Error stack:', error.stack);
   
