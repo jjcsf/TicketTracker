@@ -4,6 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client/src"),
@@ -13,8 +14,14 @@ export default defineConfig({
   },
   build: {
     outDir: "dist/public",
+    assetsDir: "assets",
     rollupOptions: {
       input: path.resolve(__dirname, "client/index-container.html"),
+      output: {
+        assetFileNames: 'assets/[name].[hash][extname]',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js',
+      },
     },
   },
   server: {

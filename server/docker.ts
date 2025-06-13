@@ -52,7 +52,7 @@ app.use((req, res, next) => {
     app.use('/assets', (req, res, next) => {
       console.log(`[docker] Asset requested: ${req.path}`);
       next();
-    }, express.static(path.join(__dirname, "public/assets"), {
+    }, express.static(path.join(process.cwd(), "dist/public/assets"), {
       setHeaders: (res, filePath) => {
         console.log(`[docker] Serving asset: ${filePath}`);
         if (filePath.endsWith('.js')) {
@@ -62,7 +62,7 @@ app.use((req, res, next) => {
     }));
     
     // Then serve static files for non-API routes
-    app.use(express.static(path.join(__dirname, "public")));
+    app.use(express.static(path.join(process.cwd(), "dist/public")));
     
     // Start the server
     server.listen(port, "0.0.0.0", () => {
