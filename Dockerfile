@@ -18,10 +18,10 @@ RUN npm install pg@^8.11.3 cors@^2.8.5
 # Verify dist folder was created and list contents
 RUN ls -la dist/ || echo "dist folder not found"
 
-# Copy the dashboard server to root
-COPY container-dashboard-server.js ./
+# Copy the React server to root
+COPY container-react-server.js ./
 
 EXPOSE 5050
 ENV NODE_ENV=production
 
-CMD ["node", "container-dashboard-server.js"]
+CMD ["node", "container-react-server.js"]
