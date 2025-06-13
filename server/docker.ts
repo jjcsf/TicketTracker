@@ -19,7 +19,7 @@ registerContainerAuthRoutes(app).then((server) => {
     res.sendFile(path.join(__dirname, "../dist/index.html"));
   });
 
-  server.listen(Number(port), "0.0.0.0", () => {
+  server.listen(port, "0.0.0.0", () => {
     console.log(`[docker] Season Ticket Manager running on port ${port}`);
     console.log(`[docker] Access at http://localhost:${port}`);
   });
