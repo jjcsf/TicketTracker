@@ -9,8 +9,8 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the frontend first (outputs to dist/public)
-RUN npm run build
+# Build the container-specific frontend (outputs to dist/public)
+RUN npx vite build --config vite.config.container.ts
 
 # Verify frontend build succeeded
 RUN ls -la dist/public/ && test -f dist/public/index.html

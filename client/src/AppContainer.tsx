@@ -20,13 +20,41 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={LocalAuthPage} />
-      <LocalProtectedRoute path="/" component={() => <Dashboard />} />
-      <LocalProtectedRoute path="/games" component={() => <Games />} />
-      <LocalProtectedRoute path="/finances" component={() => <Finances />} />
-      <LocalProtectedRoute path="/ticket-holders" component={() => <TicketHolders />} />
-      <LocalProtectedRoute path="/seat-predictions" component={() => <SeatPredictions />} />
-      <LocalProtectedRoute path="/reports" component={() => <Reports />} />
-      <LocalProtectedRoute path="/seats" component={() => <Seats />} />
+      <Route path="/">
+        <LocalProtectedRoute>
+          <Dashboard />
+        </LocalProtectedRoute>
+      </Route>
+      <Route path="/games">
+        <LocalProtectedRoute>
+          <Games />
+        </LocalProtectedRoute>
+      </Route>
+      <Route path="/finances">
+        <LocalProtectedRoute>
+          <Finances />
+        </LocalProtectedRoute>
+      </Route>
+      <Route path="/ticket-holders">
+        <LocalProtectedRoute>
+          <TicketHolders />
+        </LocalProtectedRoute>
+      </Route>
+      <Route path="/seat-predictions">
+        <LocalProtectedRoute>
+          <SeatPredictions />
+        </LocalProtectedRoute>
+      </Route>
+      <Route path="/reports">
+        <LocalProtectedRoute>
+          <Reports />
+        </LocalProtectedRoute>
+      </Route>
+      <Route path="/seats">
+        <LocalProtectedRoute>
+          <Seats />
+        </LocalProtectedRoute>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
