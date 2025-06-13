@@ -14,12 +14,8 @@ ENV NODE_ENV=production
 ENV VITE_AUTH_TYPE=local
 RUN npm run build
 
-# Ensure dist/public directory exists and copy files
-RUN mkdir -p dist/public && \
-    if [ -d "dist" ] && [ "$(ls -A dist)" ]; then \
-      cp -r dist/* dist/public/ || true; \
-    fi && \
-    ls -la dist/public/
+# Verify frontend build succeeded
+RUN ls -la dist/ && test -f dist/index.html
 
 # Build the container-specific server
 RUN npx esbuild server/docker.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/docker.js

@@ -1,6 +1,10 @@
 import express from "express";
 import { registerContainerAuthRoutes } from "./container-auth-routes";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = parseInt(process.env.PORT || "5050");
@@ -9,14 +13,14 @@ const port = parseInt(process.env.PORT || "5050");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from the dist/public directory
-app.use(express.static(path.join(__dirname, "../dist/public")));
+// Serve static files from the dist directory (built frontend)
+app.use(express.static(path.join(__dirname, "../dist")));
 
 // Setup routes with local authentication
 registerContainerAuthRoutes(app).then((server) => {
   // Serve the React app for all non-API routes
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../dist/public/index.html"));
+    res.sendFile(path.join(__dirname, "../dist/index.html"));
   });
 
   server.listen(port, "0.0.0.0", () => {
