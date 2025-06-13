@@ -55,18 +55,46 @@ app.use((req, res, next) => {
 
 // Static file serving for production
 function serveStatic(app: express.Application) {
-  const distPath = path.join(__dirname, "..", "dist");
+  const publicPath = path.join(__dirname, "..", "dist", "public");
+  const indexPath = path.join(publicPath, "index.html");
+  
+  log(`Static files path: ${publicPath}`);
+  log(`Index file path: ${indexPath}`);
   
   if (process.env.NODE_ENV === "production") {
-    app.use(express.static(distPath));
+    // Check if static files exist
+    try {
+      const fs = require('fs');
+      if (fs.existsSync(publicPath)) {
+        log(`Static directory exists: ${publicPath}`);
+        const files = fs.readdirSync(publicPath);
+        log(`Static files: ${files.join(', ')}`);
+      } else {
+        log(`Static directory does not exist: ${publicPath}`);
+      }
+      
+      if (fs.existsSync(indexPath)) {
+        log(`Index file exists: ${indexPath}`);
+      } else {
+        log(`Index file does not exist: ${indexPath}`);
+      }
+    } catch (err) {
+      log(`Error checking static files: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    
+    app.use(express.static(publicPath));
     
     app.get("*", (req, res, next) => {
       if (req.path.startsWith("/api")) {
         return next();
       }
       
-      const indexPath = path.join(distPath, "index.html");
-      res.sendFile(indexPath);
+      res.sendFile(indexPath, (err) => {
+        if (err) {
+          log(`Error serving index.html: ${err.message}`);
+          res.status(500).send('Application files not found');
+        }
+      });
     });
   }
 }
