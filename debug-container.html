@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Debug - Season Ticket Manager</title>
+    <script>
+      console.log('[DEBUG] Starting debug page load');
+      
+      // Catch all errors
+      window.addEventListener('error', function(e) {
+        console.error('[DEBUG] JavaScript Error:', e.error);
+        console.error('[DEBUG] Error details:', {
+          message: e.message,
+          filename: e.filename,
+          lineno: e.lineno,
+          colno: e.colno,
+          stack: e.error?.stack
+        });
+        
+        // Show error on page
+        document.body.innerHTML = `
+          <div style="padding: 20px; background: #fee; border: 1px solid #f00; margin: 20px;">
+            <h1>JavaScript Error Detected</h1>
+            <p><strong>Message:</strong> ${e.message}</p>
+            <p><strong>File:</strong> ${e.filename}</p>
+            <p><strong>Line:</strong> ${e.lineno}:${e.colno}</p>
+            <pre style="background: #f0f0f0; padding: 10px; overflow: auto;">${e.error?.stack || 'No stack trace'}</pre>
+          </div>
+        `;
+      });
+
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('[DEBUG] Unhandled Promise Rejection:', e.reason);
+        document.body.innerHTML += `
+          <div style="padding: 20px; background: #ffe; border: 1px solid #fa0; margin: 20px;">
+            <h1>Promise Rejection Detected</h1>
+            <p><strong>Reason:</strong> ${e.reason}</p>
+          </div>
+        `;
+      });
+
+      // Test basic functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('[DEBUG] DOM loaded, testing basic functionality');
+        
+        const root = document.getElementById('root');
+        if (!root) {
+          console.error('[DEBUG] Root element not found');
+          return;
+        }
+        
+        root.innerHTML = `
+          <div style="padding: 20px;">
+            <h1>Debug Mode Active</h1>
+            <p>JavaScript is working. Testing React bundle...</p>
+            <button onclick="testReactLoad()">Load React Bundle</button>
+            <div id="status"></div>
+          </div>
+        `;
+      });
+
+      function testReactLoad() {
+        console.log('[DEBUG] Testing React bundle load');
+        const status = document.getElementById('status');
+        status.innerHTML = '<p>Loading React bundle...</p>';
+        
+        // Try to load the React bundle
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = '/assets/index-CfFPOGtQ.js';
+        script.onload = function() {
+          console.log('[DEBUG] React bundle loaded successfully');
+          status.innerHTML = '<p style="color: green;">React bundle loaded successfully</p>';
+        };
+        script.onerror = function(e) {
+          console.error('[DEBUG] Failed to load React bundle:', e);
+          status.innerHTML = '<p style="color: red;">Failed to load React bundle</p>';
+        };
+        document.head.appendChild(script);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root">Loading debug page...</div>
+  </body>
+</html>

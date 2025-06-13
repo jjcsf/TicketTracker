@@ -1,0 +1,29 @@
+season-ticket-manager  | [container] Registering container auth routes
+season-ticket-manager  | [auth] Setting up local authentication middleware
+season-ticket-manager  | [auth] Registering /api/auth/register route
+season-tickets-db      | 
+season-ticket-manager  | [auth] Registering /api/auth/login route
+season-ticket-manager  | [auth] Registering /api/auth/logout route
+season-ticket-manager  | [auth] Registering /api/auth/user route
+season-ticket-manager  | [auth] All authentication routes registered successfully
+season-ticket-manager  | [container] Authentication middleware setup complete
+season-tickets-db      | PostgreSQL Database directory appears to contain a database; Skipping initialization
+season-ticket-manager  | [docker] Season Ticket Manager running on port 5050
+season-ticket-manager  | [docker] Using local authentication system
+season-tickets-db      | 
+season-tickets-db      | 2025-06-13 05:44:18.532 UTC [1] LOG:  starting PostgreSQL 15.13 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+season-tickets-db      | 2025-06-13 05:44:18.532 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+season-tickets-db      | 2025-06-13 05:44:18.532 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+season-tickets-db      | 2025-06-13 05:44:18.578 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+season-tickets-db      | 2025-06-13 05:44:18.613 UTC [29] LOG:  database system was shut down at 2025-06-13 05:44:07 UTC
+season-tickets-db      | 2025-06-13 05:44:18.659 UTC [1] LOG:  database system is ready to accept connections
+season-ticket-manager  | [docker] Access at http://localhost:5050
+season-ticket-manager  | [docker] Test API at: http://localhost:5050/api/test
+season-ticket-manager  | [docker] GET /
+season-ticket-manager  | [docker] GET /assets/index-CfFPOGtQ.js
+season-ticket-manager  | [docker] GET /assets/index-BDrodgEw.css
+season-ticket-manager  | [docker] GET /favicon.ico
+season-ticket-manager  | [docker] GET /
+season-ticket-manager  | [docker] GET /assets/index-CfFPOGtQ.js
+season-ticket-manager  | [docker] GET /assets/index-BDrodgEw.css
+season-ticket-manager  | [docker] GET /favicon.ico
