@@ -198,8 +198,9 @@ export function setupLocalAuth(app: Express) {
   // Get current user endpoint
   console.log("[auth] Registering /api/auth/user route");
   app.get("/api/auth/user", (req, res) => {
-    console.log("[auth] GET /api/auth/user called");
+    console.log("[auth] GET /api/auth/user called, authenticated:", req.isAuthenticated());
     if (!req.isAuthenticated() || !req.user) {
+      console.log("[auth] User not authenticated, returning 401");
       return res.status(401).json({ message: "Not authenticated" });
     }
     
@@ -211,6 +212,16 @@ export function setupLocalAuth(app: Express) {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
+    });
+  });
+
+  // Health check endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      environment: "container",
+      authType: "local"
     });
   });
 
