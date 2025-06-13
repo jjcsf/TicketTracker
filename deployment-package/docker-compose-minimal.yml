@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  season-ticket-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile.minimal
+    container_name: season-ticket-manager-minimal
+    ports:
+      - "5050:5050"
+    environment:
+      NODE_ENV: production
+      PORT: 5050
+      SESSION_SECRET: minimal-container-session-secret-key-67890
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5050/api/test"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
