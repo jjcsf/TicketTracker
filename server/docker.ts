@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createServer, type Server } from "http";
+import fs from "fs";
 import { registerRoutes } from "./routes";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -63,23 +64,18 @@ function serveStatic(app: express.Application) {
   
   if (process.env.NODE_ENV === "production") {
     // Check if static files exist
-    try {
-      const fs = require('fs');
-      if (fs.existsSync(publicPath)) {
-        log(`Static directory exists: ${publicPath}`);
-        const files = fs.readdirSync(publicPath);
-        log(`Static files: ${files.join(', ')}`);
-      } else {
-        log(`Static directory does not exist: ${publicPath}`);
-      }
-      
-      if (fs.existsSync(indexPath)) {
-        log(`Index file exists: ${indexPath}`);
-      } else {
-        log(`Index file does not exist: ${indexPath}`);
-      }
-    } catch (err) {
-      log(`Error checking static files: ${err instanceof Error ? err.message : String(err)}`);
+    if (fs.existsSync(publicPath)) {
+      log(`Static directory exists: ${publicPath}`);
+      const files = fs.readdirSync(publicPath);
+      log(`Static files: ${files.join(', ')}`);
+    } else {
+      log(`Static directory does not exist: ${publicPath}`);
+    }
+    
+    if (fs.existsSync(indexPath)) {
+      log(`Index file exists: ${indexPath}`);
+    } else {
+      log(`Index file does not exist: ${indexPath}`);
     }
     
     app.use(express.static(publicPath));
@@ -110,10 +106,10 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 async function startServer() {
   try {
-    const server = await registerRoutes(app);
-    
-    // Serve static files in production
+    // Serve static files first
     serveStatic(app);
+    
+    const server = await registerRoutes(app);
 
     const port = parseInt(process.env.PORT || "5050");
     server.listen(port, () => {
