@@ -18,7 +18,7 @@ RUN npm run build
 # Install production dependencies only
 RUN npm ci --only=production
 
-EXPOSE 5000
+EXPOSE 5050
 
 ENV NODE_ENV=production
 

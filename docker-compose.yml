@@ -20,8 +20,9 @@ services:
   app:
     build: .
     ports:
-      - "5000:5000"
+      - "5050:5050"
     environment:
+      PORT: 5050
       DATABASE_URL: postgresql://postgres:ticketpass123@postgres:5432/ticket_management
       NODE_ENV: production
     depends_on:
