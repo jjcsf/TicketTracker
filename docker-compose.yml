@@ -27,7 +27,7 @@ services:
       NODE_ENV: production
       SESSION_SECRET: LnaywtczXVRNdKoW4BA9RgMhGSwU2EgtxLJQtb5o2OFxAXyV/hIrpBhfAigw7pM7uzHLSxIypM4yP3ewNBRjPg==
 
-      REPLIT_DOMAINS: localhost:5050,your-domain.com
+      REPLIT_DOMAINS: localhost:5050
       REPL_ID: d2b0a110-7413-403c-ac19-f2acdef4136c
       ISSUER_URL: https://replit.com/oidc
     depends_on:
