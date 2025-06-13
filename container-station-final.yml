@@ -11,7 +11,7 @@ services:
       - PORT=5050
       - DATABASE_URL=postgresql://season_user:season_pass@postgres:5432/season_tickets_db
       - SESSION_SECRET=your-super-secret-session-key-change-this-in-production-12345
-      - AUTH_TYPE=local
+      - VITE_AUTH_TYPE=local
     depends_on:
       postgres:
         condition: service_healthy
