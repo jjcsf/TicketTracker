@@ -30,9 +30,9 @@ services:
       - PORT=5050
       - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
       - NODE_ENV=production
-      - SESSION_SECRET=REPLACE-WITH-32-CHAR-RANDOM-STRING
-      - REPLIT_DOMAINS=localhost:5050,YOUR-NAS-IP:5050
-      - REPL_ID=YOUR-REPL-ID-HERE
+      - SESSION_SECRET=LnaywtczXVRNdKoW4BA9RgMhGSwU2EgtxLJQtb5o2OFxAXyV/hIrpBhfAigw7pM7uzHLSxIypM4yP3ewNBRjPg==
+      - REPLIT_DOMAINS=localhost:5050,http://192.168.0.236/:5050
+      - REPL_ID=d2b0a110-7413-403c-ac19-f2acdef4136c
       - ISSUER_URL=https://replit.com/oidc
     depends_on:
       postgres:
