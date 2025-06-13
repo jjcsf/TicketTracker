@@ -1,31 +1,30 @@
 version: '3.8'
-
 services:
   season-ticket-manager:
-    image: jjcsf/season-ticket-manager:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: season-ticket-manager
     ports:
       - "5050:5050"
     environment:
-      - NODE_ENV=production
-      - PORT=5050
-      - DATABASE_URL=postgresql://season_user:season_pass@postgres:5432/season_tickets_db
-      - SESSION_SECRET=your-super-secret-session-key-change-this-in-production-12345
-      - VITE_AUTH_TYPE=local
+      NODE_ENV: production
+      PORT: 5050
+      DATABASE_URL: postgresql://season_user:season_pass@postgres:5432/season_tickets_db
+      SESSION_SECRET: your-super-secret-session-key-change-this-in-production-12345
+      VITE_AUTH_TYPE: local
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - season-network
 
   postgres:
     image: postgres:15-alpine
     container_name: season-postgres
     environment:
-      - POSTGRES_DB=season_tickets_db
-      - POSTGRES_USER=season_user
-      - POSTGRES_PASSWORD=season_pass
+      POSTGRES_DB: season_tickets_db
+      POSTGRES_USER: season_user
+      POSTGRES_PASSWORD: season_pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -36,13 +35,7 @@ services:
       timeout: 10s
       retries: 5
     restart: unless-stopped
-    networks:
-      - season-network
 
 volumes:
   postgres_data:
     driver: local
-
-networks:
-  season-network:
-    driver: bridge
