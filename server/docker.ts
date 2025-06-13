@@ -19,13 +19,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Setup routes with local authentication BEFORE static files
-registerContainerAuthRoutes(app).then((server) => {
-  // Serve static files AFTER API routes are registered
+(async () => {
+  // Setup routes with local authentication first
+  const server = await registerContainerAuthRoutes(app);
+  
+  // Then serve static files for non-API routes
   app.use(express.static(path.join(__dirname, "public")));
+  
+  // Start the server
   server.listen(port, "0.0.0.0", () => {
     console.log(`[docker] Season Ticket Manager running on port ${port}`);
     console.log(`[docker] Using local authentication system`);
     console.log(`[docker] Access at http://localhost:${port}`);
   });
-});
+})();
