@@ -476,7 +476,7 @@ const dashboardHTML = `<!DOCTYPE html>
 </head>
 <body>
     <div class="navbar">
-        <h1>49ers Season Ticket Manager</h1>
+        <h1>Season Ticket Manager</h1>
         <div class="user">Container Admin</div>
     </div>
     

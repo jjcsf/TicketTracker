@@ -13,7 +13,7 @@ export default function Landing() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <TicketIcon className="w-5 h-5 text-primary-foreground" />
               </div>
-              <h1 className="ml-3 text-xl font-bold text-slate-900">TicketManager</h1>
+              <h1 className="ml-3 text-xl font-bold text-slate-900">Season Ticket Manager</h1>
             </div>
             <Button onClick={() => window.location.href = "/api/login"}>
               Sign In
