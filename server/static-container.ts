@@ -206,12 +206,15 @@ app.use((req, res, next) => {
 </body>
 </html>`;
 
-    // Serve the simple HTML
+    // Serve the simple HTML for all non-API routes
     app.get('/', (req, res) => {
+      console.log('[static-container] Serving authentication page');
       res.send(containerHTML);
     });
 
+    // Catch all other routes and serve the auth page
     app.get('*', (req, res) => {
+      console.log(`[static-container] Serving auth page for route: ${req.path}`);
       res.send(containerHTML);
     });
 
