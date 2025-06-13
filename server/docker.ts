@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer, type Server } from "http";
 import fs from "fs";
-import { registerRoutes } from "./routes";
+import { registerGoogleRoutes } from "./google-routes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -109,7 +109,7 @@ async function startServer() {
     // Serve static files first
     serveStatic(app);
     
-    const server = await registerRoutes(app);
+    const server = await registerGoogleRoutes(app);
 
     const port = parseInt(process.env.PORT || "5050");
     server.listen(port, () => {
