@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: season-tickets-db
+    environment:
+      POSTGRES_DB: ticket_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ticketpass123
+    volumes:
+      - season_tickets_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ticket_management"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - season-tickets-network
+
+  season-ticket-manager:
+    image: season-ticket-manager:latest
+    container_name: season-ticket-manager
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - DATABASE_URL=postgresql://postgres:ticketpass123@postgres:5432/ticket_management
+      - NODE_ENV=production
+      - SESSION_SECRET=CHANGE-THIS-TO-SECURE-RANDOM-STRING-32-CHARS
+      - REPLIT_DOMAINS=localhost:5050,your-nas-ip:5050,your-domain.com
+      - REPL_ID=your-repl-id-here
+      - ISSUER_URL=https://replit.com/oidc
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - season_tickets_logs:/app/logs
+    networks:
+      - season-tickets-network
+
+volumes:
+  season_tickets_db:
+    driver: local
+  season_tickets_logs:
+    driver: local
+
+networks:
+  season-tickets-network:
+    driver: bridge
