@@ -1,34 +1,3 @@
-#!/bin/bash
-
-echo "Building Final Season Ticket Manager Container..."
-
-# Create final deployment directory
-rm -rf final-deployment
-mkdir -p final-deployment
-
-# Copy essential files
-cp Dockerfile.static final-deployment/
-cp docker-compose-static.yml final-deployment/
-cp package.json final-deployment/
-cp package-lock.json final-deployment/
-mkdir -p final-deployment/server
-cp server/static-server.ts final-deployment/server/
-
-# Build the static server
-echo "Building static server..."
-npx esbuild server/static-server.ts --platform=node --packages=external --bundle --format=esm --outfile=final-deployment/server.mjs
-
-# Verify build
-if [ -f "final-deployment/server.mjs" ]; then
-    SIZE=$(wc -c < final-deployment/server.mjs)
-    echo "✅ Static server built successfully (${SIZE} bytes)"
-else
-    echo "❌ Build failed"
-    exit 1
-fi
-
-# Create comprehensive README
-cat > final-deployment/README.md << 'EOF'
 # Season Ticket Manager - Final Container Deployment
 
 ## Problem Solved
@@ -94,41 +63,3 @@ curl http://localhost:5050/api/test
 ```
 
 This final container eliminates all blank page issues and provides a complete working Season Ticket Manager foundation.
-EOF
-
-# Test the built server
-echo "🧪 Testing final container..."
-cd final-deployment
-PORT=5090 timeout 8s node server.mjs > test-output.log 2>&1 &
-SERVER_PID=$!
-sleep 4
-
-# Test endpoints
-API_RESPONSE=$(curl -s http://localhost:5090/api/test 2>/dev/null)
-HTML_RESPONSE=$(curl -s http://localhost:5090/ 2>/dev/null)
-
-if [[ $API_RESPONSE == *"Static Server"* ]]; then
-    echo "✅ API endpoint working"
-else
-    echo "⚠️  API test needs verification"
-fi
-
-if [[ $HTML_RESPONSE == *"Season Ticket Manager"* ]]; then
-    echo "✅ HTML serving working"
-else
-    echo "⚠️  HTML test needs verification"
-fi
-
-# Cleanup
-kill $SERVER_PID 2>/dev/null || true
-cd ..
-
-echo ""
-echo "📋 Final Deployment Summary:"
-echo "   Location: final-deployment/"
-echo "   Container: season-ticket-manager-static"
-echo "   Port: 5050"
-echo "   Server Size: ${SIZE} bytes"
-echo "   Status: Ready for Container Station"
-echo ""
-echo "🚀 Deploy with: docker-compose -f docker-compose-static.yml up -d"
