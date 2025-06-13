@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  season-ticket-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile.guaranteed
+    container_name: season-ticket-manager-guaranteed
+    ports:
+      - "5050:5050"
+    environment:
+      NODE_ENV: production
+      PORT: 5050
+      DATABASE_URL: postgresql://season_user:season_pass@postgres:5432/season_tickets_db
+      SESSION_SECRET: your-super-secret-session-key-change-this-in-production-12345
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: season-postgres-guaranteed
+    environment:
+      POSTGRES_DB: season_tickets_db
+      POSTGRES_USER: season_user
+      POSTGRES_PASSWORD: season_pass
+    volumes:
+      - postgres_data_guaranteed:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U season_user -d season_tickets_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data_guaranteed:
+    driver: local

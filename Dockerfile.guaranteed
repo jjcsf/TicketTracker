@@ -1,0 +1,34 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files and install production dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy all source files needed for the working container
+COPY server/working-container.ts ./
+COPY server/container-auth-routes.ts ./
+COPY server/local-auth.ts ./
+COPY server/storage.ts ./
+COPY server/db.ts ./
+COPY shared/ ./shared/
+
+# Install esbuild temporarily for building
+RUN npm install esbuild
+
+# Build the working container
+RUN npx esbuild working-container.ts --platform=node --packages=external --bundle --format=esm --outfile=working-container.js
+
+# Remove build dependencies to reduce image size
+RUN npm uninstall esbuild
+
+# Verify the built file exists
+RUN ls -la working-container.js
+
+EXPOSE 5050
+
+ENV NODE_ENV=production
+ENV PORT=5050
+
+CMD ["node", "working-container.js"]
