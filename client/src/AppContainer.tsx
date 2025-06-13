@@ -17,44 +17,34 @@ import Seats from "@/pages/seats";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  const { user, isLoading } = useLocalAuth();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <Switch>
       <Route path="/auth" component={LocalAuthPage} />
-      <Route path="/">
-        <LocalProtectedRoute>
-          <Dashboard />
-        </LocalProtectedRoute>
-      </Route>
-      <Route path="/games">
-        <LocalProtectedRoute>
-          <Games />
-        </LocalProtectedRoute>
-      </Route>
-      <Route path="/finances">
-        <LocalProtectedRoute>
-          <Finances />
-        </LocalProtectedRoute>
-      </Route>
-      <Route path="/ticket-holders">
-        <LocalProtectedRoute>
-          <TicketHolders />
-        </LocalProtectedRoute>
-      </Route>
-      <Route path="/seat-predictions">
-        <LocalProtectedRoute>
-          <SeatPredictions />
-        </LocalProtectedRoute>
-      </Route>
-      <Route path="/reports">
-        <LocalProtectedRoute>
-          <Reports />
-        </LocalProtectedRoute>
-      </Route>
-      <Route path="/seats">
-        <LocalProtectedRoute>
-          <Seats />
-        </LocalProtectedRoute>
-      </Route>
+      {user ? (
+        <>
+          <Route path="/" component={Dashboard} />
+          <Route path="/games" component={Games} />
+          <Route path="/finances" component={Finances} />
+          <Route path="/ticket-holders" component={TicketHolders} />
+          <Route path="/seat-predictions" component={SeatPredictions} />
+          <Route path="/reports" component={Reports} />
+          <Route path="/seats" component={Seats} />
+        </>
+      ) : (
+        <Route>
+          <LocalAuthPage />
+        </Route>
+      )}
       <Route component={NotFound} />
     </Switch>
   );

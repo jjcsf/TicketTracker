@@ -14,9 +14,7 @@ export default defineConfig({
   build: {
     outDir: "dist/public",
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, "client/index-container.html"),
-      },
+      input: path.resolve(__dirname, "client/index-container.html"),
     },
   },
   server: {
