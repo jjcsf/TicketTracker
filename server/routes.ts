@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated, isAuthorizedOwner } from "./replitAuth";
+import { setupBasicAuth, requireAuth, requireOwner } from "./basic-auth";
 import { ticketApiService } from "./services/ticketApiService";
 import {
   insertTeamSchema,
@@ -18,11 +18,11 @@ import {
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Setup basic authentication
+  setupBasicAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, isAuthorizedOwner, async (req: any, res) => {
+  app.get('/api/auth/user', requireAuth, requireOwner, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Team routes
-  app.get("/api/teams", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/teams", requireAuth, requireOwner, async (req, res) => {
     try {
       const teams = await storage.getTeams();
       res.json(teams);
@@ -44,7 +44,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/teams", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/teams", requireAuth, requireOwner, async (req, res) => {
     try {
       const teamData = insertTeamSchema.parse(req.body);
       const team = await storage.createTeam(teamData);
@@ -55,7 +55,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/teams/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/teams/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const team = await storage.getTeam(parseInt(req.params.id));
       if (!team) {
@@ -69,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Season routes
-  app.get("/api/seasons", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/seasons", requireAuth, requireOwner, async (req, res) => {
     try {
       const teamId = req.query.teamId ? parseInt(req.query.teamId as string) : undefined;
       const seasons = await storage.getSeasons(teamId);
@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/seasons/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/seasons/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonId = parseInt(req.params.id);
       const season = await storage.getSeason(seasonId);
@@ -94,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/seasons", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/seasons", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonData = insertSeasonSchema.parse(req.body);
       const season = await storage.createSeason(seasonData);
@@ -106,7 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Game routes
-  app.get("/api/games", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/games", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : undefined;
       const games = await storage.getGames(seasonId);
@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/games", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/games", requireAuth, requireOwner, async (req, res) => {
     try {
       const gameData = insertGameSchema.parse(req.body);
       const game = await storage.createGame(gameData);
@@ -128,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/games/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.patch("/api/games/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const gameData = insertGameSchema.partial().parse(req.body);
       const game = await storage.updateGame(parseInt(req.params.id), gameData);
@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/games/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.delete("/api/games/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const success = await storage.deleteGame(id);
@@ -157,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Ticket Holder routes
-  app.get("/api/ticket-holders", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/ticket-holders", requireAuth, requireOwner, async (req, res) => {
     try {
       const holders = await storage.getTicketHolders();
       res.json(holders);
@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/ticket-holders", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/ticket-holders", requireAuth, requireOwner, async (req, res) => {
     try {
       const holderData = insertTicketHolderSchema.parse(req.body);
       const holder = await storage.createTicketHolder(holderData);
@@ -178,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/ticket-holders/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.patch("/api/ticket-holders/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const holderData = insertTicketHolderSchema.partial().parse(req.body);
@@ -196,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Seat routes
-  app.get("/api/seats", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/seats", requireAuth, requireOwner, async (req, res) => {
     try {
       const teamId = req.query.teamId ? parseInt(req.query.teamId as string) : undefined;
       const seats = await storage.getSeats(teamId);
@@ -207,7 +207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/seats", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/seats", requireAuth, requireOwner, async (req, res) => {
     try {
       // Transform the data to match expected types before validation
       const transformedData = {
@@ -225,7 +225,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/seats/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.patch("/api/seats/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       console.log("Original request body:", req.body);
       
@@ -254,7 +254,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Seat Ownership routes
-  app.get("/api/seat-ownership", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/seat-ownership", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : undefined;
       const ownerships = await storage.getSeatOwnerships(seasonId);
@@ -265,7 +265,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/seat-ownership", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/seat-ownership", requireAuth, requireOwner, async (req, res) => {
     try {
       const ownershipData = insertSeatOwnershipSchema.parse(req.body);
       const ownership = await storage.createSeatOwnership(ownershipData);
@@ -277,7 +277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment routes
-  app.get("/api/payments", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/payments", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : undefined;
       const payments = await storage.getPayments(seasonId);
@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payments", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/payments", requireAuth, requireOwner, async (req, res) => {
     try {
       const paymentData = insertPaymentSchema.parse(req.body);
       const payment = await storage.createPayment(paymentData);
@@ -299,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/payments/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.put("/api/payments/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const paymentData = insertPaymentSchema.parse(req.body);
@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/payments/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.delete("/api/payments/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       
@@ -336,7 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payout routes
-  app.get("/api/payouts", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/payouts", requireAuth, requireOwner, async (req, res) => {
     try {
       const gameId = req.query.gameId ? parseInt(req.query.gameId as string) : undefined;
       const ticketHolderId = req.query.ticketHolderId ? parseInt(req.query.ticketHolderId as string) : undefined;
@@ -348,7 +348,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payouts", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/payouts", requireAuth, requireOwner, async (req, res) => {
     try {
       const payoutData = insertPayoutSchema.parse(req.body);
       const payout = await storage.createPayout(payoutData);
@@ -360,7 +360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Transfer routes
-  app.get("/api/transfers", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/transfers", requireAuth, requireOwner, async (req, res) => {
     try {
       const gameId = req.query.gameId ? parseInt(req.query.gameId as string) : undefined;
       const transfers = await storage.getTransfers(gameId);
@@ -371,7 +371,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/transfers", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/transfers", requireAuth, requireOwner, async (req, res) => {
     try {
       const transferData = insertTransferSchema.parse(req.body);
       const transfer = await storage.createTransfer(transferData);
@@ -382,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/transfers/:id/status", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.patch("/api/transfers/:id/status", requireAuth, requireOwner, async (req, res) => {
     try {
       const { status } = req.body;
       const transfer = await storage.updateTransferStatus(parseInt(req.params.id), status);
@@ -397,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Game Attendance routes
-  app.get("/api/game-attendance", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/game-attendance", requireAuth, requireOwner, async (req, res) => {
     try {
       const gameId = req.query.gameId ? parseInt(req.query.gameId as string) : undefined;
       const attendance = await storage.getGameAttendance(gameId);
@@ -408,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/game-attendance", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/game-attendance", requireAuth, requireOwner, async (req, res) => {
     try {
       const attendanceData = insertGameAttendanceSchema.parse(req.body);
       const attendance = await storage.createGameAttendance(attendanceData);
@@ -419,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/game-attendance/:id", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.delete("/api/game-attendance/:id", requireAuth, requireOwner, async (req, res) => {
     try {
       const attendanceId = parseInt(req.params.id);
       const success = await storage.deleteGameAttendance(attendanceId);
@@ -434,7 +434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Game Pricing routes
-  app.get("/api/game-pricing", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/game-pricing", requireAuth, requireOwner, async (req, res) => {
     try {
       const gameId = req.query.gameId ? parseInt(req.query.gameId as string) : undefined;
       const pricing = await storage.getGamePricing(gameId);
@@ -445,7 +445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/game-pricing", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/game-pricing", requireAuth, requireOwner, async (req, res) => {
     try {
       const pricingData = insertGamePricingSchema.parse(req.body);
       const pricing = await storage.upsertGamePricing(pricingData);
@@ -457,7 +457,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard routes
-  app.get("/api/dashboard/stats/:seasonId", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/dashboard/stats/:seasonId", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonId = parseInt(req.params.seasonId);
       const stats = await storage.getDashboardStats(seasonId);
@@ -468,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/dashboard/financial-summary/:seasonId", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/dashboard/financial-summary/:seasonId", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonId = parseInt(req.params.seasonId);
       const summary = await storage.getFinancialSummary(seasonId);
@@ -479,7 +479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/dashboard/ticket-holder-profits/:seasonId", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/dashboard/ticket-holder-profits/:seasonId", requireAuth, requireOwner, async (req, res) => {
     try {
       const seasonId = parseInt(req.params.seasonId);
       const profits = await storage.getTicketHolderProfits(seasonId);
@@ -491,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Schedule import routes
-  app.post("/api/schedule/preview", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/schedule/preview", requireAuth, requireOwner, async (req, res) => {
     try {
       const { teamName, year, includePreseason, includePostseason, homeGamesOnly } = req.body;
       
@@ -966,7 +966,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/schedule/import", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/schedule/import", requireAuth, requireOwner, async (req, res) => {
     try {
       const { seasonId, games } = req.body;
       
@@ -1004,7 +1004,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Season data import/export routes
-  app.post("/api/seasons/import", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/seasons/import", requireAuth, requireOwner, async (req, res) => {
     try {
       const { seasonId, csvData } = req.body;
       
@@ -1106,7 +1106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Team Performance routes
-  app.get("/api/team-performance", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/team-performance", requireAuth, requireOwner, async (req, res) => {
     try {
       const teamId = req.query.teamId ? parseInt(req.query.teamId as string) : undefined;
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : undefined;
@@ -1118,7 +1118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/team-performance/calculate", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/team-performance/calculate", requireAuth, requireOwner, async (req, res) => {
     try {
       const { teamId, seasonId } = req.body;
       if (!teamId || !seasonId) {
@@ -1133,7 +1133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Seat Value Prediction routes
-  app.get("/api/seat-predictions", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/seat-predictions", requireAuth, requireOwner, async (req, res) => {
     try {
       const seatId = req.query.seatId ? parseInt(req.query.seatId as string) : undefined;
       const seasonId = req.query.seasonId ? parseInt(req.query.seasonId as string) : undefined;
@@ -1145,7 +1145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/seat-predictions/calculate", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.post("/api/seat-predictions/calculate", requireAuth, requireOwner, async (req, res) => {
     try {
       const { seasonId } = req.body;
       if (!seasonId) {
@@ -1159,7 +1159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/seat-predictions/:seatId/:seasonId", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/seat-predictions/:seatId/:seasonId", requireAuth, requireOwner, async (req, res) => {
     try {
       const seatId = parseInt(req.params.seatId);
       const seasonId = parseInt(req.params.seasonId);
@@ -1176,7 +1176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/seat-predictions/:seatId/:seasonId/similar-prices", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/seat-predictions/:seatId/:seasonId/similar-prices", requireAuth, requireOwner, async (req, res) => {
     try {
       const seatId = parseInt(req.params.seatId);
       const seasonId = parseInt(req.params.seasonId);
@@ -1241,7 +1241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // API configuration status endpoint
-  app.get("/api/external-api/status", isAuthenticated, async (req, res) => {
+  app.get("/api/external-api/status", requireAuth, async (req, res) => {
     try {
       const status = ticketApiService.getConfigurationStatus();
       res.json(status);
@@ -1252,7 +1252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Report routes
-  app.get("/api/reports/season-summary", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/reports/season-summary", requireAuth, requireOwner, async (req, res) => {
     try {
       const teamId = req.query.teamId ? parseInt(req.query.teamId as string) : undefined;
       const reports = await storage.getSeasonSummaryReport(teamId);
@@ -1263,7 +1263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/seat-license-investments", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/reports/seat-license-investments", requireAuth, requireOwner, async (req, res) => {
     try {
       const teamId = req.query.teamId ? parseInt(req.query.teamId as string) : undefined;
       const investments = await storage.getSeatLicenseInvestmentSummary(teamId);
@@ -1274,7 +1274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/reports/owner-balances", isAuthenticated, isAuthorizedOwner, async (req, res) => {
+  app.get("/api/reports/owner-balances", requireAuth, requireOwner, async (req, res) => {
     try {
       const ownerBalances = await storage.getOwnerBalances();
       res.json(ownerBalances);
