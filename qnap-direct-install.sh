@@ -4,7 +4,7 @@
 set -e
 
 APP_DIR="/share/Web/season-ticket-manager"
-APP_PORT="8080"
+APP_PORT="8888"
 
 echo "Installing Season Ticket Manager directly on QNAP..."
 
@@ -50,7 +50,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8888;
 
 // Data file path
 const dataFile = path.join(__dirname, 'data.json');
