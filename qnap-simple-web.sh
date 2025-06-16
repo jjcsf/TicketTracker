@@ -1,0 +1,544 @@
+#!/bin/bash
+
+# Simple Web-based Season Ticket Manager for QNAP
+set -e
+
+WEB_DIR="/share/Web/season-ticket"
+PORT="8888"
+
+echo "Creating Season Ticket Manager web application..."
+
+# Create web directory
+mkdir -p "$WEB_DIR"
+cd "$WEB_DIR"
+
+# Create a simple PHP-based application that works on QNAP's built-in web server
+cat > index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Season Ticket Manager - QNAP</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-active { background-color: #3b82f6; color: white; }
+        .tab-inactive { color: #6b7280; }
+        .tab-inactive:hover { color: #374151; background-color: #f3f4f6; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        const { useState, useEffect, createElement: h } = React;
+
+        // Local storage for data persistence
+        const STORAGE_KEY = 'season-ticket-data';
+        
+        function getStoredData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                return stored ? JSON.parse(stored) : getDefaultData();
+            } catch {
+                return getDefaultData();
+            }
+        }
+
+        function saveData(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        }
+
+        function getDefaultData() {
+            return {
+                user: { username: 'admin', password: 'admin123' },
+                teams: [{ id: 1, name: 'Home Team', createdAt: new Date().toISOString() }],
+                seasons: [{ id: 1, teamId: 1, year: 2025, createdAt: new Date().toISOString() }],
+                games: [
+                    { id: 1, seasonId: 1, date: '2025-01-15', time: '19:00', opponent: 'Team A', isHome: true, venue: 'Home Stadium' },
+                    { id: 2, seasonId: 1, date: '2025-01-22', time: '19:30', opponent: 'Team B', isHome: false, venue: 'Away Stadium' },
+                    { id: 3, seasonId: 1, date: '2025-01-29', time: '18:00', opponent: 'Team C', isHome: true, venue: 'Home Stadium' }
+                ],
+                ticketHolders: [
+                    { id: 1, name: 'John Smith', email: 'john@example.com', notes: 'VIP member' },
+                    { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', notes: 'Season ticket holder' },
+                    { id: 3, name: 'Mike Davis', email: 'mike@example.com', notes: 'Corporate account' }
+                ],
+                seats: [
+                    { id: 1, section: 'A', row: '1', number: '1', licenseCost: 1000 },
+                    { id: 2, section: 'A', row: '1', number: '2', licenseCost: 1000 },
+                    { id: 3, section: 'B', row: '2', number: '5', licenseCost: 1200 }
+                ],
+                payments: [
+                    { id: 1, ticketHolderId: 1, amount: 1000, type: 'from_owner', date: '2025-01-01', description: 'Seat A1 license fee' },
+                    { id: 2, ticketHolderId: 2, amount: 1000, type: 'from_owner', date: '2025-01-01', description: 'Seat A2 license fee' },
+                    { id: 3, ticketHolderId: 3, amount: 1200, type: 'from_owner', date: '2025-01-01', description: 'Seat B5 license fee' }
+                ]
+            };
+        }
+
+        function LoginForm({ onLogin }) {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const data = getStoredData();
+                
+                if (username === data.user.username && password === data.user.password) {
+                    onLogin({ username });
+                } else {
+                    setError('Invalid credentials');
+                }
+            };
+
+            return h('div', { className: 'min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4' },
+                h('div', { className: 'bg-white rounded-2xl shadow-xl p-8 w-full max-w-md' },
+                    h('div', { className: 'text-center mb-8' },
+                        h('div', { className: 'w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4' },
+                            h('svg', { className: 'w-8 h-8 text-white', fill: 'currentColor', viewBox: '0 0 20 20' },
+                                h('path', { d: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' })
+                            )
+                        ),
+                        h('h1', { className: 'text-3xl font-bold text-gray-900 mb-2' }, 'Season Ticket Manager'),
+                        h('p', { className: 'text-gray-600' }, 'QNAP Web Application')
+                    ),
+                    error && h('div', { className: 'mb-6 p-4 bg-red-50 border-l-4 border-red-400 text-red-700 rounded' }, error),
+                    h('form', { onSubmit: handleSubmit, className: 'space-y-6' },
+                        h('div', null,
+                            h('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Username'),
+                            h('input', {
+                                type: 'text',
+                                value: username,
+                                onChange: (e) => setUsername(e.target.value),
+                                className: 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                                required: true
+                            })
+                        ),
+                        h('div', null,
+                            h('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Password'),
+                            h('input', {
+                                type: 'password',
+                                value: password,
+                                onChange: (e) => setPassword(e.target.value),
+                                className: 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+                                required: true
+                            })
+                        ),
+                        h('button', {
+                            type: 'submit',
+                            className: 'w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium transition-colors'
+                        }, 'Sign In')
+                    ),
+                    h('div', { className: 'mt-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600' },
+                        h('div', { className: 'font-medium mb-2' }, 'Default Credentials:'),
+                        h('div', null, 'Username: admin'),
+                        h('div', null, 'Password: admin123')
+                    )
+                )
+            );
+        }
+
+        function Dashboard({ user, onLogout }) {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [data, setData] = useState(getStoredData());
+
+            const updateData = (newData) => {
+                setData(newData);
+                saveData(newData);
+            };
+
+            const formatCurrency = (value) => {
+                return new Intl.NumberFormat('en-US', { 
+                    style: 'currency', 
+                    currency: 'USD' 
+                }).format(value);
+            };
+
+            const getStats = () => {
+                const totalRevenue = data.payments.filter(p => p.type === 'from_owner').reduce((sum, p) => sum + p.amount, 0);
+                const totalCosts = data.payments.filter(p => p.type === 'to_team').reduce((sum, p) => sum + p.amount, 0);
+                return {
+                    totalRevenue,
+                    totalCosts,
+                    totalProfit: totalRevenue - totalCosts,
+                    totalGames: data.games.length,
+                    ticketHolders: data.ticketHolders.length,
+                    activeSeats: data.seats.length
+                };
+            };
+
+            const addGame = () => {
+                const date = prompt('Enter game date (YYYY-MM-DD):');
+                const time = prompt('Enter game time (HH:MM):');
+                const opponent = prompt('Enter opponent team:');
+                const venue = prompt('Enter venue:');
+                const isHome = confirm('Is this a home game?');
+                
+                if (date && opponent) {
+                    const newGame = {
+                        id: Math.max(...data.games.map(g => g.id), 0) + 1,
+                        seasonId: 1,
+                        date,
+                        time: time || '',
+                        opponent,
+                        venue: venue || '',
+                        isHome
+                    };
+                    updateData({
+                        ...data,
+                        games: [...data.games, newGame]
+                    });
+                }
+            };
+
+            const addTicketHolder = () => {
+                const name = prompt('Enter full name:');
+                const email = prompt('Enter email:');
+                const notes = prompt('Enter notes (optional):');
+                
+                if (name && email) {
+                    const newHolder = {
+                        id: Math.max(...data.ticketHolders.map(h => h.id), 0) + 1,
+                        name,
+                        email,
+                        notes: notes || ''
+                    };
+                    updateData({
+                        ...data,
+                        ticketHolders: [...data.ticketHolders, newHolder]
+                    });
+                }
+            };
+
+            const deleteGame = (id) => {
+                if (confirm('Delete this game?')) {
+                    updateData({
+                        ...data,
+                        games: data.games.filter(g => g.id !== id)
+                    });
+                }
+            };
+
+            const deleteTicketHolder = (id) => {
+                if (confirm('Delete this ticket holder?')) {
+                    updateData({
+                        ...data,
+                        ticketHolders: data.ticketHolders.filter(h => h.id !== id)
+                    });
+                }
+            };
+
+            const stats = getStats();
+
+            const tabs = [
+                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                { id: 'games', label: 'Games', icon: '🏆' },
+                { id: 'ticket-holders', label: 'Ticket Holders', icon: '👥' },
+                { id: 'seats', label: 'Seats', icon: '🪑' },
+                { id: 'finances', label: 'Finances', icon: '💰' }
+            ];
+
+            return h('div', { className: 'min-h-screen bg-gray-50' },
+                h('header', { className: 'bg-white shadow' },
+                    h('div', { className: 'max-w-7xl mx-auto px-4 py-6' },
+                        h('div', { className: 'flex justify-between items-center' },
+                            h('div', null,
+                                h('h1', { className: 'text-3xl font-bold text-gray-900' }, 'Season Ticket Manager'),
+                                h('p', { className: 'text-gray-600 mt-1' }, 'QNAP Web Application')
+                            ),
+                            h('div', { className: 'flex items-center space-x-4' },
+                                h('span', { className: 'text-gray-600' }, `Welcome, ${user.username}`),
+                                h('button', {
+                                    onClick: onLogout,
+                                    className: 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700'
+                                }, 'Logout')
+                            )
+                        )
+                    )
+                ),
+                h('div', { className: 'max-w-7xl mx-auto px-4' },
+                    h('nav', { className: 'flex space-x-8 py-4' },
+                        tabs.map(tab =>
+                            h('button', {
+                                key: tab.id,
+                                onClick: () => setActiveTab(tab.id),
+                                className: `flex items-center space-x-2 py-2 px-4 rounded-lg font-medium transition-colors ${
+                                    activeTab === tab.id ? 'tab-active' : 'tab-inactive'
+                                }`
+                            },
+                                h('span', null, tab.icon),
+                                h('span', null, tab.label)
+                            )
+                        )
+                    )
+                ),
+                h('main', { className: 'max-w-7xl mx-auto px-4 py-6' },
+                    activeTab === 'dashboard' && h('div', null,
+                        h('h2', { className: 'text-2xl font-bold text-gray-900 mb-6' }, 'Dashboard Overview'),
+                        h('div', { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8' },
+                            [
+                                { label: 'Total Revenue', value: formatCurrency(stats.totalRevenue), color: 'text-green-600', bg: 'bg-green-50', icon: '💰' },
+                                { label: 'Total Games', value: stats.totalGames, color: 'text-blue-600', bg: 'bg-blue-50', icon: '🏆' },
+                                { label: 'Ticket Holders', value: stats.ticketHolders, color: 'text-purple-600', bg: 'bg-purple-50', icon: '👥' },
+                                { label: 'Net Profit', value: formatCurrency(stats.totalProfit), color: 'text-indigo-600', bg: 'bg-indigo-50', icon: '📈' },
+                                { label: 'Active Seats', value: stats.activeSeats, color: 'text-orange-600', bg: 'bg-orange-50', icon: '🪑' },
+                                { label: 'Platform', value: 'QNAP Web', color: 'text-gray-600', bg: 'bg-gray-50', icon: '🌐' }
+                            ].map((stat, i) =>
+                                h('div', { key: i, className: `${stat.bg} p-6 rounded-lg border border-gray-200` },
+                                    h('div', { className: 'flex items-center justify-between mb-3' },
+                                        h('span', { className: 'text-2xl' }, stat.icon),
+                                        h('div', { className: `text-2xl font-bold ${stat.color}` }, stat.value)
+                                    ),
+                                    h('div', { className: 'text-gray-700 font-medium' }, stat.label)
+                                )
+                            )
+                        ),
+                        h('div', { className: 'bg-white p-6 rounded-lg shadow' },
+                            h('h3', { className: 'text-lg font-semibold mb-4' }, 'Quick Actions'),
+                            h('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+                                h('button', {
+                                    onClick: addGame,
+                                    className: 'bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2'
+                                }, 
+                                    h('span', null, '🏆'),
+                                    h('span', null, 'Add Game')
+                                ),
+                                h('button', {
+                                    onClick: addTicketHolder,
+                                    className: 'bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center space-x-2'
+                                },
+                                    h('span', null, '👥'),
+                                    h('span', null, 'Add Ticket Holder')
+                                )
+                            )
+                        )
+                    ),
+
+                    activeTab === 'games' && h('div', null,
+                        h('div', { className: 'flex justify-between items-center mb-6' },
+                            h('h2', { className: 'text-2xl font-bold text-gray-900' }, 'Games Management'),
+                            h('button', {
+                                onClick: addGame,
+                                className: 'bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2'
+                            },
+                                h('span', null, '➕'),
+                                h('span', null, 'Add Game')
+                            )
+                        ),
+                        h('div', { className: 'bg-white shadow rounded-lg overflow-hidden' },
+                            h('table', { className: 'min-w-full' },
+                                h('thead', { className: 'bg-gray-50' },
+                                    h('tr', null,
+                                        ['Date', 'Time', 'Opponent', 'Venue', 'Location', 'Actions'].map(header =>
+                                            h('th', { 
+                                                key: header,
+                                                className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                                            }, header)
+                                        )
+                                    )
+                                ),
+                                h('tbody', { className: 'bg-white divide-y divide-gray-200' },
+                                    data.games.map(game =>
+                                        h('tr', { key: game.id },
+                                            h('td', { className: 'px-6 py-4 text-sm font-medium text-gray-900' }, game.date),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, game.time || 'TBD'),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, game.opponent),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, game.venue || 'TBD'),
+                                            h('td', { className: 'px-6 py-4' },
+                                                h('span', { 
+                                                    className: `px-3 py-1 rounded-full text-xs font-medium ${
+                                                        game.isHome ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                                                    }`
+                                                }, game.isHome ? 'Home' : 'Away')
+                                            ),
+                                            h('td', { className: 'px-6 py-4' },
+                                                h('button', {
+                                                    onClick: () => deleteGame(game.id),
+                                                    className: 'text-red-600 hover:text-red-800 font-medium'
+                                                }, 'Delete')
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    activeTab === 'ticket-holders' && h('div', null,
+                        h('div', { className: 'flex justify-between items-center mb-6' },
+                            h('h2', { className: 'text-2xl font-bold text-gray-900' }, 'Ticket Holders'),
+                            h('button', {
+                                onClick: addTicketHolder,
+                                className: 'bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center space-x-2'
+                            },
+                                h('span', null, '➕'),
+                                h('span', null, 'Add Holder')
+                            )
+                        ),
+                        h('div', { className: 'bg-white shadow rounded-lg overflow-hidden' },
+                            h('table', { className: 'min-w-full' },
+                                h('thead', { className: 'bg-gray-50' },
+                                    h('tr', null,
+                                        ['Name', 'Email', 'Notes', 'Actions'].map(header =>
+                                            h('th', { 
+                                                key: header,
+                                                className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                                            }, header)
+                                        )
+                                    )
+                                ),
+                                h('tbody', { className: 'bg-white divide-y divide-gray-200' },
+                                    data.ticketHolders.map(holder =>
+                                        h('tr', { key: holder.id },
+                                            h('td', { className: 'px-6 py-4 text-sm font-medium text-gray-900' }, holder.name),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, holder.email),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-500' }, holder.notes || 'No notes'),
+                                            h('td', { className: 'px-6 py-4' },
+                                                h('button', {
+                                                    onClick: () => deleteTicketHolder(holder.id),
+                                                    className: 'text-red-600 hover:text-red-800 font-medium'
+                                                }, 'Delete')
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    activeTab === 'seats' && h('div', null,
+                        h('h2', { className: 'text-2xl font-bold text-gray-900 mb-6' }, 'Seat Management'),
+                        h('div', { className: 'bg-white shadow rounded-lg overflow-hidden' },
+                            h('table', { className: 'min-w-full' },
+                                h('thead', { className: 'bg-gray-50' },
+                                    h('tr', null,
+                                        ['Section', 'Row', 'Number', 'License Cost'].map(header =>
+                                            h('th', { 
+                                                key: header,
+                                                className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                                            }, header)
+                                        )
+                                    )
+                                ),
+                                h('tbody', { className: 'bg-white divide-y divide-gray-200' },
+                                    data.seats.map(seat =>
+                                        h('tr', { key: seat.id },
+                                            h('td', { className: 'px-6 py-4 text-sm font-medium text-gray-900' }, seat.section),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, seat.row),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, seat.number),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, formatCurrency(seat.licenseCost))
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+
+                    activeTab === 'finances' && h('div', null,
+                        h('h2', { className: 'text-2xl font-bold text-gray-900 mb-6' }, 'Financial Overview'),
+                        h('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6 mb-8' },
+                            [
+                                { label: 'Total Revenue', value: formatCurrency(stats.totalRevenue), color: 'text-green-600' },
+                                { label: 'Total Costs', value: formatCurrency(stats.totalCosts), color: 'text-red-600' },
+                                { label: 'Net Profit', value: formatCurrency(stats.totalProfit), color: 'text-blue-600' }
+                            ].map((stat, i) =>
+                                h('div', { key: i, className: 'bg-white p-6 rounded-lg shadow' },
+                                    h('div', { className: `text-3xl font-bold ${stat.color} mb-2` }, stat.value),
+                                    h('div', { className: 'text-gray-700 font-medium' }, stat.label)
+                                )
+                            )
+                        ),
+                        h('div', { className: 'bg-white shadow rounded-lg overflow-hidden' },
+                            h('h3', { className: 'text-lg font-semibold p-6 border-b' }, 'Payment History'),
+                            h('table', { className: 'min-w-full' },
+                                h('thead', { className: 'bg-gray-50' },
+                                    h('tr', null,
+                                        ['Date', 'Description', 'Amount', 'Type'].map(header =>
+                                            h('th', { 
+                                                key: header,
+                                                className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                                            }, header)
+                                        )
+                                    )
+                                ),
+                                h('tbody', { className: 'bg-white divide-y divide-gray-200' },
+                                    data.payments.map(payment =>
+                                        h('tr', { key: payment.id },
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, payment.date),
+                                            h('td', { className: 'px-6 py-4 text-sm text-gray-900' }, payment.description),
+                                            h('td', { className: 'px-6 py-4 text-sm font-medium text-gray-900' }, formatCurrency(payment.amount)),
+                                            h('td', { className: 'px-6 py-4' },
+                                                h('span', { 
+                                                    className: `px-3 py-1 rounded-full text-xs font-medium ${
+                                                        payment.type === 'from_owner' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                    }`
+                                                }, payment.type === 'from_owner' ? 'Revenue' : 'Cost')
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        }
+
+        function App() {
+            const [user, setUser] = useState(null);
+
+            return user ? 
+                h(Dashboard, { user, onLogout: () => setUser(null) }) :
+                h(LoginForm, { onLogin: setUser });
+        }
+
+        ReactDOM.render(h(App), document.getElementById('root'));
+    </script>
+</body>
+</html>
+EOF
+
+# Create simple PHP health check
+cat > health.php << 'EOF'
+<?php
+header('Content-Type: application/json');
+echo json_encode([
+    'status' => 'ok',
+    'platform' => 'QNAP Web Server',
+    'timestamp' => date('c'),
+    'version' => '1.0.0'
+]);
+?>
+EOF
+
+# Set permissions
+chmod 644 index.html
+chmod 644 health.php
+
+echo ""
+echo "✓ Season Ticket Manager web application created successfully!"
+echo ""
+echo "Directory: $WEB_DIR"
+echo ""
+echo "Access URLs:"
+echo "  Main App: http://your-qnap-ip/season-ticket/"
+echo "  Health:   http://your-qnap-ip/season-ticket/health.php"
+echo ""
+echo "Default Login: admin / admin123"
+echo ""
+echo "Features:"
+echo "  ✓ Dashboard with analytics"
+echo "  ✓ Games management"
+echo "  ✓ Ticket holders database"
+echo "  ✓ Seat management"
+echo "  ✓ Financial overview"
+echo "  ✓ Data persisted in browser localStorage"
+echo ""
+echo "Note: This uses QNAP's built-in web server, no additional services needed!"
